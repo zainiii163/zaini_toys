@@ -1,0 +1,6 @@
+{
+  "buildCommand": "cd ../.. && npm install -g pnpm && pnpm install && pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build && pnpm --filter @toys/web build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "installCommand": "echo 'using root install'"
+}

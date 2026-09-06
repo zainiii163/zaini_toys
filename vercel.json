@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm install -g pnpm && pnpm install && pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build && pnpm --filter @toys/web build && pnpm --filter @toys/admin build",
+  "outputDirectory": "apps/web/dist",
+  "installCommand": "npm install -g pnpm && pnpm install",
+  "framework": "vite"
+}
