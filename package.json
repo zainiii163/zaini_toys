@@ -9,7 +9,8 @@
     "dev:web": "pnpm --filter @toys/web dev",
     "dev:admin": "pnpm --filter @toys/admin dev",
     "build": "pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build && pnpm --filter @toys/api build && pnpm --filter @toys/web build && pnpm --filter @toys/admin build",
-    "build:prod": "pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build && pnpm --filter @toys/web build && pnpm --filter @toys/admin build && pnpm --filter @toys/api build",
+    "build:prod": "pnpm --filter @toys/config build && pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build && pnpm --filter @toys/api build",
+    "build:api": "pnpm --filter @toys/config build && pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build && pnpm --filter @toys/api build",
     "start": "cd apps/api && node dist/server.js",
     "typecheck": "pnpm -r typecheck"
   },
