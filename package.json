@@ -1,0 +1,31 @@
+{
+  "name": "toy-ecommerce",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Complete scalable toy e-commerce platform - Monorepo",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter @toys/api dev\" \"pnpm --filter @toys/web dev\" \"pnpm --filter @toys/admin dev\"",
+    "dev:api": "pnpm --filter @toys/api dev",
+    "dev:web": "pnpm --filter @toys/web dev",
+    "dev:admin": "pnpm --filter @toys/admin dev",
+    "build": "pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build && pnpm --filter @toys/api build && pnpm --filter @toys/web build && pnpm --filter @toys/admin build",
+    "build:prod": "pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build && pnpm --filter @toys/web build && pnpm --filter @toys/admin build && pnpm --filter @toys/api build",
+    "start": "cd apps/api && node dist/server.js",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "keywords": [
+    "ecommerce",
+    "toys",
+    "mongodb",
+    "express",
+    "react"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+

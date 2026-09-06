@@ -1,0 +1,103 @@
+import { createBrowserRouter } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useAppDispatch } from './hooks/typed'
+import { setUser, setBootstrapDone } from './store/authSlice'
+import { useGetMeQuery } from './app/services/auth'
+
+import Layout from './components/layout/Layout'
+import HomePage from './pages/HomePage'
+import ShopPage from './pages/ShopPage'
+import ProductDetailPage from './pages/ProductDetailPage'
+import CartPage from './pages/CartPage'
+import CheckoutPage from './pages/CheckoutPage'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import AccountPage from './pages/AccountPage'
+import { ProfileTab, OrdersTab, AddressesTab, WishlistTab, LoyaltyTab } from './pages/AccountPage'
+import OrderSuccessPage from './pages/OrderSuccessPage'
+import OrderTrackingPage from './pages/OrderTrackingPage'
+import WishlistPage from './pages/WishlistPage'
+import TermsPage from './pages/TermsPage'
+import PrivacyPage from './pages/PrivacyPage'
+import ContactPage from './pages/ContactPage'
+import AboutPage from './pages/AboutPage'
+import FaqPage from './pages/FaqPage'
+
+// Bootstrap component to validate session on first load
+function AuthBootstrap({ children }: { children: React.ReactNode }) {
+  const dispatch = useAppDispatch()
+  const { data, isSuccess, isError } = useGetMeQuery()
+
+  useEffect(() => {
+    if (isSuccess && data?.data?.user) {
+      dispatch(setUser(data.data.user))
+    }
+    if (isSuccess || isError) {
+      dispatch(setBootstrapDone())
+    }
+  }, [data, isSuccess, isError, dispatch])
+
+  return <>{children}</>
+}
+
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Layout />,
+    children: [
+      {
+        index: true,
+        element: (
+          <AuthBootstrap>
+            <HomePage />
+          </AuthBootstrap>
+        ),
+      },
+      { path: 'shop', element: <ShopPage /> },
+      { path: 'product/:slug', element: <ProductDetailPage /> },
+      { path: 'cart', element: <CartPage /> },
+      { path: 'checkout', element: <CheckoutPage /> },
+      { path: 'login', element: <LoginPage /> },
+      { path: 'register', element: <RegisterPage /> },
+      { path: 'forgot-password', element: <ForgotPasswordPage /> },
+      { path: 'order-success/:orderNumber', element: <OrderSuccessPage /> },
+      { path: 'orders/track/:orderNumber', element: <OrderTrackingPage /> },
+      { path: 'wishlist', element: <WishlistPage /> },
+      { path: 'terms', element: <TermsPage /> },
+      { path: 'privacy', element: <PrivacyPage /> },
+      { path: 'contact', element: <ContactPage /> },
+      { path: 'about', element: <AboutPage /> },
+      { path: 'faq', element: <FaqPage /> },
+      {
+        path: 'account',
+        element: (
+          <AuthBootstrap>
+            <AccountPage />
+          </AuthBootstrap>
+        ),
+        children: [
+          { index: true, element: <ProfileTab /> },
+          { path: 'profile', element: <ProfileTab /> },
+          { path: 'orders', element: <OrdersTab /> },
+          { path: 'orders/:orderId', element: <OrdersTab /> },
+          { path: 'addresses', element: <AddressesTab /> },
+          { path: 'wishlist', element: <WishlistTab /> },
+          { path: 'loyalty', element: <LoyaltyTab /> },
+        ],
+      },
+      { path: '*', element: <NotFound /> },
+    ],
+  },
+])
+
+function NotFound() {
+  return (
+    <div className="container-toy py-20 text-center">
+      <p className="text-6xl">🧸</p>
+      <h1 className="mt-4 font-display text-3xl font-bold">Page Not Found</h1>
+      <p className="mt-2 text-gray-500">The page you're looking for doesn't exist.</p>
+      <a href="/" className="btn-primary mt-6 inline-block">Back to Home</a>
+    </div>
+  )
+}

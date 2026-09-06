@@ -1,0 +1,77 @@
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useAppDispatch } from './hooks/typed'
+import { setUser, setBootstrapDone } from './store/authSlice'
+import { useGetMeQuery } from './app/services/auth'
+
+import AdminLayout from './components/AdminLayout'
+import LoginPage from './pages/LoginPage'
+import DashboardPage from './pages/DashboardPage'
+import ProductsPage from './pages/ProductsPage'
+import ProductFormPage from './pages/ProductFormPage'
+import OrdersPage from './pages/OrdersPage'
+import OrderDetailPage from './pages/OrderDetailPage'
+import CustomersPage from './pages/CustomersPage'
+import CategoriesPage from './pages/CategoriesPage'
+import BrandsPage from './pages/BrandsPage'
+import CouponsPage from './pages/CouponsPage'
+import BannersPage from './pages/BannersPage'
+import FlashSalesPage from './pages/FlashSalesPage'
+import ReviewsPage from './pages/ReviewsPage'
+import SupportPage from './pages/SupportPage'
+import SettingsPage from './pages/SettingsPage'
+
+function AuthBootstrap({ children }: { children: React.ReactNode }) {
+  const dispatch = useAppDispatch()
+  const { data, isSuccess, isError } = useGetMeQuery()
+
+  useEffect(() => {
+    if (isSuccess && data?.data?.user) {
+      dispatch(setUser(data.data.user))
+    }
+    if (isSuccess || isError) {
+      dispatch(setBootstrapDone())
+    }
+  }, [data, isSuccess, isError, dispatch])
+
+  return <>{children}</>
+}
+
+const basename = import.meta.env.PROD ? '/admin' : ''
+
+const router = createBrowserRouter([
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/',
+    element: (
+      <AuthBootstrap>
+        <AdminLayout />
+      </AuthBootstrap>
+    ),
+    children: [
+      { path: 'dashboard', element: <DashboardPage /> },
+      { path: 'products', element: <ProductsPage /> },
+      { path: 'products/new', element: <ProductFormPage /> },
+      { path: 'products/:id/edit', element: <ProductFormPage /> },
+      { path: 'orders', element: <OrdersPage /> },
+      { path: 'orders/:id', element: <OrderDetailPage /> },
+      { path: 'customers', element: <CustomersPage /> },
+      { path: 'categories', element: <CategoriesPage /> },
+      { path: 'brands', element: <BrandsPage /> },
+      { path: 'coupons', element: <CouponsPage /> },
+      { path: 'banners', element: <BannersPage /> },
+      { path: 'flash-sales', element: <FlashSalesPage /> },
+      { path: 'reviews', element: <ReviewsPage /> },
+      { path: 'support', element: <SupportPage /> },
+      { path: 'settings', element: <SettingsPage /> },
+      { index: true, element: <DashboardPage /> },
+    ],
+  },
+], { basename })
+
+export default function App() {
+  return <RouterProvider router={router} />
+}
