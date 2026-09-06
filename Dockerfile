@@ -38,8 +38,8 @@ COPY packages/utils/package.json packages/utils/
 COPY apps/api/package.json apps/api/
 RUN pnpm install --frozen-lockfile --prod
 
-COPY --from=build-api apps/api/dist apps/api/dist
-COPY --from=build-api apps/api/node_modules apps/api/node_modules
+COPY --from=build-api /app/node_modules /app/node_modules
+COPY --from=build-api /app/apps/api/dist /app/apps/api/dist
 
 EXPOSE 5000
 ENV NODE_ENV=production
