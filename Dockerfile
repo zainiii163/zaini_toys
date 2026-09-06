@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install dependencies
 FROM base AS deps
-COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc tsconfig.base.json ./
 COPY packages/config/package.json packages/config/
 COPY packages/types/package.json packages/types/
 COPY packages/validation/package.json packages/validation/
@@ -30,7 +30,7 @@ FROM node:20-alpine AS production
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
-COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc ./
 COPY packages/config/package.json packages/config/
 COPY packages/types/package.json packages/types/
 COPY packages/validation/package.json packages/validation/
@@ -39,6 +39,7 @@ COPY apps/api/package.json apps/api/
 RUN pnpm install --frozen-lockfile --prod
 
 COPY --from=build-api apps/api/dist apps/api/dist
+COPY --from=build-api apps/api/node_modules apps/api/node_modules
 
 EXPOSE 5000
 ENV NODE_ENV=production
