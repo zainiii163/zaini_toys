@@ -32,7 +32,7 @@ coverage/
 .vercel/
 
 # Railway
-railway.json
+# railway.json
 
 # Data
 data/
