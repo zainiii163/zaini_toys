@@ -1,7 +1,7 @@
 {
   "version": 2,
   "installCommand": "npm install -g pnpm && pnpm install",
-  "buildCommand": "pnpm --filter @toys/config build && pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build && pnpm --filter @toys/api build",
+  "buildCommand": "pnpm --filter @toys/config build && pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build && pnpm --filter @toys/api build && mkdir -p public",
   "outputDirectory": "public",
   "framework": null,
   "rewrites": [
