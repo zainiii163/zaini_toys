@@ -40,6 +40,10 @@ RUN pnpm install --frozen-lockfile --prod
 
 COPY --from=build-api /app/node_modules /app/node_modules
 COPY --from=build-api /app/apps/api/dist /app/apps/api/dist
+COPY --from=build-packages /app/packages/config/dist /app/packages/config/dist
+COPY --from=build-packages /app/packages/types/dist /app/packages/types/dist
+COPY --from=build-packages /app/packages/validation/dist /app/packages/validation/dist
+COPY --from=build-packages /app/packages/utils/dist /app/packages/utils/dist
 
 EXPOSE 5000
 ENV NODE_ENV=production
