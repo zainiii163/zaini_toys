@@ -37,8 +37,6 @@ function AuthBootstrap({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-const basename = import.meta.env.PROD ? '/admin' : ''
-
 const router = createBrowserRouter([
   {
     path: '/login',
@@ -70,7 +68,7 @@ const router = createBrowserRouter([
       { index: true, element: <DashboardPage /> },
     ],
   },
-], { basename })
+])
 
 export default function App() {
   return <RouterProvider router={router} />

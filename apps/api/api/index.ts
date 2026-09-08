@@ -1,23 +1,27 @@
-import { RequestHandler } from 'express';
+import mongoose from 'mongoose';
 import app from '../src/app';
-import { connectDB } from '../src/config/database';
 import { initializeSettings } from '../src/models/Setting';
 
-let isConnected = false;
+let cached = global as any;
+if (!cached.mongoose) {
+  cached.mongoose = { conn: null, promise: null };
+}
 
-const handler: RequestHandler = async (req, res) => {
-  if (!isConnected) {
-    await connectDB();
-    await initializeSettings();
-    isConnected = true;
+async function connectDB() {
+  if (cached.mongoose.conn) return cached.mongoose.conn;
+  if (!cached.mongoose.promise) {
+    cached.mongoose.promise = mongoose.connect(process.env.MONGODB_URI!).then((m) => m);
   }
-  return app(req, res);
-};
+  cached.mongoose.conn = await cached.mongoose.promise;
+  try { await initializeSettings(); } catch {}
+  return cached.mongoose.conn;
+}
 
-export default handler;
+export default async function handler(req: any, res: any) {
+  await connectDB();
+  return app(req, res);
+}
 
 export const config = {
-  api: {
-    bodyParser: false,
-  },
+  api: { bodyParser: false },
 };
