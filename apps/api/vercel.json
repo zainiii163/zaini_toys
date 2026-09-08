@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "buildCommand": "cd ../.. && npm install -g pnpm && pnpm install && pnpm --filter @toys/config build && pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build && pnpm --filter @toys/api build",
-  "installCommand": "cd ../.. && npm install -g pnpm && pnpm install",
-  "outputDirectory": "dist",
+  "installCommand": "npm install -g pnpm && pnpm install",
+  "buildCommand": "pnpm --filter @toys/config build && pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build && pnpm --filter @toys/api build",
+  "outputDirectory": "public",
   "framework": null,
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api" }
+    { "source": "/api/(.*)", "destination": "/api/index.ts" }
   ]
 }
