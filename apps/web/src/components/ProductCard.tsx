@@ -1,13 +1,17 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Star } from 'lucide-react'
+import toast from 'react-hot-toast'
 import type { Product } from '../lib/types'
 import { useAddToCartMutation } from '../app/services/cart'
+import { useAppSelector } from '../hooks/typed'
 
 interface Props {
   product: Product
 }
 
 export default function ProductCard({ product }: Props) {
+  const navigate = useNavigate()
+  const auth = useAppSelector((s) => s.auth)
   const [addToCart] = useAddToCartMutation()
 
   const image = product.images?.find((i) => i.isPrimary)?.url || product.images?.[0]?.url || ''
@@ -15,9 +19,18 @@ export default function ProductCard({ product }: Props) {
   const original = product.salePrice ? product.price : null
   const discount = original ? Math.round(((original - price) / original) * 100) : 0
 
-  const onAdd = (e: React.MouseEvent) => {
+  const onAdd = async (e: React.MouseEvent) => {
     e.preventDefault()
-    addToCart({ product: product._id, quantity: 1 })
+    if (!auth.isAuthenticated) {
+      navigate('/login', { state: { from: `/product/${product.slug}` } })
+      return
+    }
+    try {
+      await addToCart({ product: product._id, quantity: 1 }).unwrap()
+      toast.success('Added to cart!')
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to add to cart')
+    }
   }
 
   return (

@@ -38,13 +38,44 @@ export default function CartPage() {
   const total = subtotal + shipping - (cart?.couponDiscount || 0)
 
   const onSaveForLater = async (itemId: string, productId: string) => {
-    if (!wishlist) {
-      const wl = await createWishlist({ name: 'My Wishlist' }).unwrap()
-      await addToWishlist({ wishlistId: wl.data._id, product: productId })
-    } else {
-      await addToWishlist({ wishlistId: wishlist._id, product: productId })
+    try {
+      if (!wishlist) {
+        const wl = await createWishlist({ name: 'My Wishlist' }).unwrap()
+        await addToWishlist({ wishlistId: wl.data._id, product: productId }).unwrap()
+      } else {
+        await addToWishlist({ wishlistId: wishlist._id, product: productId }).unwrap()
+      }
+      await removeItem(itemId).unwrap()
+      toast.success('Saved for later')
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to save for later')
     }
-    await removeItem(itemId)
+  }
+
+  const onUpdateQty = async (itemId: string, quantity: number) => {
+    try {
+      await updateQty({ itemId, body: { quantity } }).unwrap()
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to update quantity')
+    }
+  }
+
+  const onRemoveItem = async (itemId: string) => {
+    try {
+      await removeItem(itemId).unwrap()
+      toast.success('Item removed')
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to remove item')
+    }
+  }
+
+  const onClearCart = async () => {
+    try {
+      await clearCart().unwrap()
+      toast.success('Cart cleared')
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to clear cart')
+    }
   }
 
   return (
@@ -69,9 +100,9 @@ export default function CartPage() {
                   <div className="mt-2 flex items-center gap-2">
                     <span className="font-bold text-gray-900">Rs. {item.price.toLocaleString()}</span>
                     <div className="flex items-center border border-gray-300 rounded-lg">
-                      <button onClick={() => updateQty({ itemId: item._id, body: { quantity: Math.max(1, item.quantity - 1) } })} className="p-2 text-gray-500 hover:bg-gray-50"><Minus className="h-4 w-4" /></button>
-                      <input value={item.quantity} onChange={(e) => updateQty({ itemId: item._id, body: { quantity: Number(e.target.value) || 1 } })} className="w-12 text-center border-x border-gray-300 bg-transparent outline-none" min="1" />
-                      <button onClick={() => updateQty({ itemId: item._id, body: { quantity: item.quantity + 1 } })} className="p-2 text-gray-500 hover:bg-gray-50"><Plus className="h-4 w-4" /></button>
+                      <button onClick={() => onUpdateQty(item._id, Math.max(1, item.quantity - 1))} className="p-2 text-gray-500 hover:bg-gray-50"><Minus className="h-4 w-4" /></button>
+                      <input value={item.quantity} onChange={(e) => onUpdateQty(item._id, Number(e.target.value) || 1)} className="w-12 text-center border-x border-gray-300 bg-transparent outline-none" min="1" />
+                      <button onClick={() => onUpdateQty(item._id, item.quantity + 1)} className="p-2 text-gray-500 hover:bg-gray-50"><Plus className="h-4 w-4" /></button>
                     </div>
                   </div>
                 </div>
@@ -81,7 +112,7 @@ export default function CartPage() {
                   <button onClick={() => onSaveForLater(item._id, item.product._id)} disabled={wishLoading} className="text-sm text-gray-500 hover:text-red-500 flex items-center gap-1">
                     <Heart className="h-4 w-4" /> Save
                   </button>
-                  <button onClick={() => removeItem(item._id)} className="text-gray-400 hover:text-red-500 p-1">
+                  <button onClick={() => onRemoveItem(item._id)} className="text-gray-400 hover:text-red-500 p-1">
                     <Trash2 className="h-5 w-5" />
                   </button>
                 </div>
@@ -90,7 +121,7 @@ export default function CartPage() {
           </ul>
 
           {items.length > 1 && (
-            <button onClick={() => clearCart().unwrap()} className="mt-4 text-sm text-gray-500 hover:text-red-500 flex items-center gap-1">
+            <button onClick={onClearCart} className="mt-4 text-sm text-gray-500 hover:text-red-500 flex items-center gap-1">
               <X className="h-4 w-4" /> Clear Cart
             </button>
           )}

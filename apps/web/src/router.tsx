@@ -44,15 +44,15 @@ function AuthBootstrap({ children }: { children: React.ReactNode }) {
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Layout />,
+    element: (
+      <AuthBootstrap>
+        <Layout />
+      </AuthBootstrap>
+    ),
     children: [
       {
         index: true,
-        element: (
-          <AuthBootstrap>
-            <HomePage />
-          </AuthBootstrap>
-        ),
+        element: <HomePage />,
       },
       { path: 'shop', element: <ShopPage /> },
       { path: 'product/:slug', element: <ProductDetailPage /> },
@@ -71,11 +71,7 @@ export const router = createBrowserRouter([
       { path: 'faq', element: <FaqPage /> },
       {
         path: 'account',
-        element: (
-          <AuthBootstrap>
-            <AccountPage />
-          </AuthBootstrap>
-        ),
+        element: <AccountPage />,
         children: [
           { index: true, element: <ProfileTab /> },
           { path: 'profile', element: <ProfileTab /> },

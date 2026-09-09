@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Heart, ShoppingCart, Trash2, Plus } from 'lucide-react'
+import toast from 'react-hot-toast'
 import {
   useGetWishlistsQuery,
   useCreateWishlistMutation,
@@ -27,9 +28,50 @@ export default function WishlistPage() {
   const onCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newName.trim()) return
-    await createWishlist({ name: newName.trim() }).unwrap()
-    setNewName('')
-    setShowCreate(false)
+    try {
+      await createWishlist({ name: newName.trim() }).unwrap()
+      setNewName('')
+      setShowCreate(false)
+      toast.success('Wishlist created!')
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to create wishlist')
+    }
+  }
+
+  const onMoveAll = async (wlId: string) => {
+    try {
+      await moveAllToCart(wlId).unwrap()
+      toast.success('All items moved to cart!')
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to move items to cart')
+    }
+  }
+
+  const onDelete = async (wlId: string) => {
+    try {
+      await deleteWishlist(wlId).unwrap()
+      toast.success('Wishlist deleted')
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to delete wishlist')
+    }
+  }
+
+  const onAddToCart = async (productId: string) => {
+    try {
+      await addToCart({ product: productId, quantity: 1 }).unwrap()
+      toast.success('Added to cart!')
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to add to cart')
+    }
+  }
+
+  const onRemoveItem = async (wishlistId: string, itemId: string) => {
+    try {
+      await removeWishlistItem({ wishlistId, itemId }).unwrap()
+      toast.success('Removed from wishlist')
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to remove item')
+    }
   }
 
   return (
@@ -74,10 +116,10 @@ export default function WishlistPage() {
                   {wl.isPublic && <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Public</span>}
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <button onClick={() => moveAllToCart(wl._id)} className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline">
+                  <button onClick={() => onMoveAll(wl._id)} className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline">
                     <ShoppingCart className="h-4 w-4" /> Move all to cart
                   </button>
-                  <button onClick={() => deleteWishlist(wl._id)} className="inline-flex items-center gap-1 text-sm text-red-600 hover:underline">
+                  <button onClick={() => onDelete(wl._id)} className="inline-flex items-center gap-1 text-sm text-red-600 hover:underline">
                     <Trash2 className="h-4 w-4" /> Delete
                   </button>
                 </div>
@@ -99,13 +141,13 @@ export default function WishlistPage() {
                         </p>
                         <div className="mt-auto pt-3 flex items-center gap-2">
                           <button
-                            onClick={() => item.product?._id && addToCart({ product: item.product._id, quantity: 1 }).unwrap()}
+                            onClick={() => item.product?._id && onAddToCart(item.product._id)}
                             className="btn-primary flex-1 inline-flex items-center justify-center gap-1 text-xs py-2"
                           >
                             <ShoppingCart className="h-3.5 w-3.5" /> Add
                           </button>
                           <button
-                            onClick={() => removeWishlistItem({ wishlistId: wl._id, itemId: item._id })}
+                            onClick={() => onRemoveItem(wl._id, item._id)}
                             className="text-gray-400 hover:text-red-600"
                             title="Remove"
                           >

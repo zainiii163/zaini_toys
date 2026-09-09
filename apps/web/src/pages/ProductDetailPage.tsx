@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Heart, Star, Truck, ShieldCheck, Share2, Minus, Plus } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { useGetProductBySlugQuery, useGetRelatedProductsQuery } from '../app/services/product'
 import { useGetProductReviewsQuery, useGetReviewSummaryQuery } from '../app/services/review'
 import { useAddToCartMutation } from '../app/services/cart'
@@ -66,7 +67,12 @@ export default function ProductDetailPage() {
       navigate('/login', { state: { from: `/product/${slug}` } })
       return
     }
-    await addToCart({ product: product._id, quantity: qty })
+    try {
+      await addToCart({ product: product._id, quantity: qty }).unwrap()
+      toast.success('Added to cart!')
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to add to cart')
+    }
   }
 
   const onAddWish = async () => {
@@ -74,11 +80,16 @@ export default function ProductDetailPage() {
       navigate('/login', { state: { from: `/product/${slug}` } })
       return
     }
-    if (!wishlist) {
-      const wl = await createWishlist({ name: 'My Wishlist' }).unwrap()
-      await addToWishlist({ wishlistId: wl.data._id, product: product._id })
-    } else {
-      await addToWishlist({ wishlistId: wishlist._id, product: product._id })
+    try {
+      if (!wishlist) {
+        const wl = await createWishlist({ name: 'My Wishlist' }).unwrap()
+        await addToWishlist({ wishlistId: wl.data._id, product: product._id }).unwrap()
+      } else {
+        await addToWishlist({ wishlistId: wishlist._id, product: product._id }).unwrap()
+      }
+      toast.success('Saved to wishlist!')
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to save to wishlist')
     }
   }
 
