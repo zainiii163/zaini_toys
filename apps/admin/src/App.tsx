@@ -20,6 +20,9 @@ import FlashSalesPage from './pages/FlashSalesPage'
 import ReviewsPage from './pages/ReviewsPage'
 import SupportPage from './pages/SupportPage'
 import SettingsPage from './pages/SettingsPage'
+import TeamPage from './pages/TeamPage'
+import AuditLogPage from './pages/AuditLogPage'
+import ReportsPage from './pages/ReportsPage'
 
 function AuthBootstrap({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch()
@@ -65,6 +68,9 @@ const router = createBrowserRouter([
       { path: 'reviews', element: <ReviewsPage /> },
       { path: 'support', element: <SupportPage /> },
       { path: 'settings', element: <SettingsPage /> },
+      { path: 'team', element: <TeamPage /> },
+      { path: 'audit-log', element: <AuditLogPage /> },
+      { path: 'reports', element: <ReportsPage /> },
       { index: true, element: <DashboardPage /> },
     ],
   },

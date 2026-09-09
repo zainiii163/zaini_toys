@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Package, ShoppingCart, Users, Tag, Layers, Image, Zap, Settings, Percent, LifeBuoy, LogOut, ChevronLeft, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Users, Tag, Layers, Image, Zap, Settings, Percent, LifeBuoy, LogOut, ChevronLeft, ChevronRight, Shield, Clock, BarChart3 } from 'lucide-react'
 import { useState } from 'react'
 import { useLogoutMutation } from '../app/services/auth'
 import { useAppDispatch } from '../hooks/typed'
@@ -17,6 +17,9 @@ const NAV = [
   { to: '/flash-sales', label: 'Flash Sales', icon: Zap },
   { to: '/reviews', label: 'Reviews', icon: LifeBuoy },
   { to: '/support', label: 'Support', icon: LifeBuoy },
+  { to: '/team', label: 'Team', icon: Shield },
+  { to: '/audit-log', label: 'Audit Log', icon: Clock },
+  { to: '/reports', label: 'Reports', icon: BarChart3 },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 

@@ -9,6 +9,10 @@ import {
 import { useGetCategoryTreeQuery } from '../app/services/category'
 import ProductCard from '../components/ProductCard'
 import SkeletonCard from '../components/SkeletonCard'
+import VideoSection from '../components/VideoSection'
+import AdBanner from '../components/AdBanner'
+import TestimonialSection from '../components/TestimonialSection'
+import NewsletterSection from '../components/NewsletterSection'
 
 export default function HomePage() {
   const { data: bannersData } = useGetBannersQuery({ position: 'hero' })
@@ -190,6 +194,24 @@ export default function HomePage() {
             : bestSellers.map((p) => <ProductCard key={p._id} product={p} />)}
         </div>
       </section>
+
+      {/* Ad Banner */}
+      <AdBanner
+        title="Summer Toy Sale"
+        subtitle="Up to 40% off on selected outdoor and water toys. Limited time offer!"
+        buttonText="Shop the Sale"
+        buttonLink="/shop?onSale=true"
+        imageUrl="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=1200&h=400&fit=crop"
+      />
+
+      {/* Videos */}
+      <VideoSection />
+
+      {/* Testimonials */}
+      <TestimonialSection />
+
+      {/* Newsletter */}
+      <NewsletterSection />
     </div>
   )
 }
