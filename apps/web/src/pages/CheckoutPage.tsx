@@ -5,6 +5,7 @@ import { useGetCartQuery } from '../app/services/cart'
 import { useGetAddressesQuery } from '../app/services/user'
 import { useCreateOrderMutation } from '../app/services/order'
 import { useAppSelector } from '../hooks/typed'
+import LoyaltyRedemption from '../components/LoyaltyRedemption'
 
 const PAYMENT_METHODS = [
   { id: 'cod', label: 'Cash on Delivery', desc: 'Pay when you receive the order', icon: '💵' },
@@ -28,6 +29,8 @@ export default function CheckoutPage() {
   const [shippingMethod, setShippingMethod] = useState<'standard' | 'express' | 'same_day'>('standard')
   const [giftWrap, setGiftWrap] = useState(false)
   const [giftMessage, setGiftMessage] = useState('')
+  const [loyaltyDiscount, setLoyaltyDiscount] = useState(0)
+  const [loyaltyPoints, setLoyaltyPoints] = useState(0)
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
   const [newAddress, setNewAddress] = useState({
     label: 'Home',
@@ -67,7 +70,7 @@ export default function CheckoutPage() {
   const discount = cart?.couponDiscount || 0
   const shipping = shippingMethod === 'standard' && subtotal >= 3000 ? 0 : SHIPPING_METHODS.find((s) => s.id === shippingMethod)?.price || 0
   const giftWrapFee = giftWrap ? 150 : 0
-  const total = subtotal + shipping + giftWrapFee - discount
+  const total = subtotal + shipping + giftWrapFee - discount - loyaltyDiscount
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -79,7 +82,7 @@ export default function CheckoutPage() {
         shippingMethod: shippingMethod as 'standard' | 'express' | 'same_day',
         paymentMethod: paymentMethod as 'cod' | 'card' | 'jazzcash' | 'easypaisa' | 'raast',
         couponCode: undefined,
-        loyaltyPointsToRedeem: 0,
+        loyaltyPointsToRedeem: loyaltyPoints,
         customerNotes: '',
       }).unwrap()
       if (paymentMethod === 'cod') {
@@ -309,11 +312,19 @@ export default function CheckoutPage() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span>Subtotal</span><span>Rs. {subtotal.toLocaleString()}</span></div>
             {discount > 0 && <div className="flex justify-between text-green-600"><span>Discount</span><span>-Rs. {discount.toLocaleString()}</span></div>}
+            {loyaltyDiscount > 0 && <div className="flex justify-between text-amber-600"><span>Loyalty Points</span><span>-Rs. {loyaltyDiscount.toLocaleString()}</span></div>}
             <div className="flex justify-between"><span>Shipping</span><span>{shipping === 0 ? 'Free' : `Rs. ${shipping.toLocaleString()}`}</span></div>
             {giftWrap && <div className="flex justify-between text-pink-600"><span>🎁 Gift Wrapping</span><span>Rs. 150</span></div>}
             <div className="flex justify-between text-lg font-bold"><span>Total</span><span>Rs. {total.toLocaleString()}</span></div>
           </div>
         </div>
+
+        <LoyaltyRedemption
+          subtotal={subtotal}
+          applied={loyaltyPoints > 0}
+          onApply={(pts, disc) => { setLoyaltyPoints(pts); setLoyaltyDiscount(disc) }}
+          onRemove={() => { setLoyaltyPoints(0); setLoyaltyDiscount(0) }}
+        />
 
         <div className="rounded-xl border border-gray-200 bg-white p-4">
           <h4 className="font-medium mb-3">Shipping Method</h4>

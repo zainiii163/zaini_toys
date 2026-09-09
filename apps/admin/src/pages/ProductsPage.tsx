@@ -1,14 +1,32 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Pencil, Trash2, Search, Download } from 'lucide-react'
-import { useGetProductsQuery, useDeleteProductMutation } from '../app/services/product'
+import { Plus, Pencil, Trash2, Search, Download, CheckSquare, Square, Eye, EyeOff } from 'lucide-react'
+import toast from 'react-hot-toast'
+import { useGetProductsQuery, useDeleteProductMutation, useUpdateProductMutation } from '../app/services/product'
 import { exportToCSV, productsToCSV } from '../lib/exportCSV'
 
 export default function ProductsPage() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [deleteProduct] = useDeleteProductMutation()
+  const [updateProduct] = useUpdateProductMutation()
   const { data, isLoading } = useGetProductsQuery({ page: String(page), limit: '20', search })
+
+  const products = data?.data || []
+  const allSelected = products.length > 0 && products.every((p) => selectedIds.includes(p._id))
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
+  }
+
+  const toggleAll = () => {
+    if (allSelected) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(products.map((p) => p._id))
+    }
+  }
 
   const handleDelete = async (id: string) => {
     if (confirm('Delete this product?')) {
@@ -16,10 +34,27 @@ export default function ProductsPage() {
     }
   }
 
+  const handleBulkDelete = async () => {
+    if (!confirm(`Delete ${selectedIds.length} products?`)) return
+    for (const id of selectedIds) {
+      await deleteProduct(id)
+    }
+    toast.success(`${selectedIds.length} products deleted`)
+    setSelectedIds([])
+  }
+
+  const handleBulkToggleActive = async (active: boolean) => {
+    for (const id of selectedIds) {
+      await updateProduct({ id, body: { isActive: active } })
+    }
+    toast.success(`${selectedIds.length} products ${active ? 'activated' : 'deactivated'}`)
+    setSelectedIds([])
+  }
+
   const handleExport = () => {
-    const products = data?.data || []
-    if (products.length === 0) return
-    exportToCSV(productsToCSV(products), `products-${new Date().toISOString().slice(0, 10)}`)
+    const toExport = selectedIds.length > 0 ? products.filter((p) => selectedIds.includes(p._id)) : products
+    if (toExport.length === 0) return
+    exportToCSV(productsToCSV(toExport), `products-${new Date().toISOString().slice(0, 10)}`)
   }
 
   return (
@@ -36,6 +71,22 @@ export default function ProductsPage() {
         </div>
       </div>
 
+      {selectedIds.length > 0 && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-3">
+          <span className="text-sm font-medium text-blue-700">{selectedIds.length} selected</span>
+          <button onClick={() => handleBulkToggleActive(true)} className="flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700">
+            <Eye className="h-3 w-3" /> Activate
+          </button>
+          <button onClick={() => handleBulkToggleActive(false)} className="flex items-center gap-1 rounded-lg bg-yellow-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-yellow-700">
+            <EyeOff className="h-3 w-3" /> Deactivate
+          </button>
+          <button onClick={handleBulkDelete} className="flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700">
+            <Trash2 className="h-3 w-3" /> Delete
+          </button>
+          <button onClick={() => setSelectedIds([])} className="ml-auto text-xs text-blue-600 hover:underline">Clear</button>
+        </div>
+      )}
+
       <div className="stat-card mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -48,6 +99,11 @@ export default function ProductsPage() {
           <table className="w-full text-left text-sm">
             <thead className="border-b border-gray-200 bg-gray-50">
               <tr>
+                <th className="px-4 py-3">
+                  <button onClick={toggleAll} className="flex items-center">
+                    {allSelected ? <CheckSquare className="h-4 w-4 text-blue-600" /> : <Square className="h-4 w-4 text-gray-400" />}
+                  </button>
+                </th>
                 <th className="px-4 py-3 font-medium">Product</th>
                 <th className="px-4 py-3 font-medium">Price</th>
                 <th className="px-4 py-3 font-medium">Stock</th>
@@ -56,8 +112,13 @@ export default function ProductsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {data?.data?.map((p) => (
-                <tr key={p._id} className="hover:bg-gray-50">
+              {products.map((p) => (
+                <tr key={p._id} className={`hover:bg-gray-50 ${selectedIds.includes(p._id) ? 'bg-blue-50' : ''}`}>
+                  <td className="px-4 py-3">
+                    <button onClick={() => toggleSelect(p._id)} className="flex items-center">
+                      {selectedIds.includes(p._id) ? <CheckSquare className="h-4 w-4 text-blue-600" /> : <Square className="h-4 w-4 text-gray-400" />}
+                    </button>
+                  </td>
                   <td className="flex items-center gap-3 px-4 py-3">
                     <img src={p.images?.[0]?.url} alt="" className="h-10 w-10 rounded-lg object-cover" />
                     <div>

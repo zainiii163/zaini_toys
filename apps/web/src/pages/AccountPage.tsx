@@ -17,6 +17,7 @@ import { useAppSelector, useAppDispatch } from '../hooks/typed'
 import { logout } from '../store/authSlice'
 import { formatDate } from '../lib/utils'
 import type { Address } from '../lib/types'
+import OrderCancelButton from '../components/OrderCancelButton'
 
 const NAV_ITEMS = [
   { path: 'profile', label: 'Profile', icon: User },
@@ -220,6 +221,7 @@ export function OrdersTab() {
                   Track
                 </Link>
               </div>
+              <OrderCancelButton order={order} />
             </div>
           ))
         )}
