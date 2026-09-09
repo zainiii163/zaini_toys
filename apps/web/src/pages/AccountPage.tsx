@@ -41,7 +41,7 @@ export default function AccountPage() {
   const auth = useAppSelector((s) => s.auth)
   const { data: profileData } = useGetProfileQuery()
 
-  const user = profileData?.data || auth.user
+  const user = profileData?.data?.user || auth.user
 
   const handleLogout = async () => {
     dispatch(logout())
@@ -105,8 +105,9 @@ export function ProfileTab() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    if (profileData?.data) {
-      setForm({ name: profileData.data.name, email: profileData.data.email, phone: profileData.data.phone })
+    if (profileData?.data?.user) {
+      const u = profileData.data.user
+      setForm({ name: u.name, email: u.email, phone: u.phone })
     }
   }, [profileData])
 
@@ -212,7 +213,7 @@ export function AddressesTab() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<Address>(EMPTY_ADDRESS)
 
-  const addresses = addressesData?.data || []
+  const addresses = addressesData?.data?.addresses || []
 
   const startEdit = (addr: Address) => {
     setForm(addr)

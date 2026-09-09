@@ -43,7 +43,7 @@ export default function CheckoutPage() {
 
   const cart = cartData?.data
   const items = cart?.items || []
-  const addresses = addressesData?.data || []
+  const addresses = addressesData?.data?.addresses || []
 
   if (!auth.isAuthenticated) {
     return (
