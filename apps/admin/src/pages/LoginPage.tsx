@@ -27,7 +27,8 @@ export default function LoginPage() {
       dispatch(setBootstrapDone())
       navigate('/dashboard', { replace: true })
     } catch (err: any) {
-      setError(err?.data?.error || 'Login failed')
+      const msg = err?.data?.error
+      setError(typeof msg === 'string' ? msg : err?.data?.message || 'Login failed')
     }
   }
 
