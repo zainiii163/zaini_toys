@@ -25,17 +25,38 @@ const brands = [
 ];
 
 const categories = [
-  { name: 'Building & Construction Toys', slug: 'building-toys', description: 'LEGO, Mega Bloks, and building sets', icon: '🧱', ageGroups: ['3-5', '6-8', '9-12'] },
-  { name: 'Action Figures & Collectibles', slug: 'action-figures', description: 'Action figures, dolls, and collectible toys', icon: '🦸', ageGroups: ['4-7', '8-12', '13+'] },
-  { name: 'Outdoor & Sports Toys', slug: 'outdoor-toys', description: 'Toys for outdoor play and sports', icon: '⚽', ageGroups: ['3-5', '6-8', '9-12'] },
-  { name: 'Educational & STEM Toys', slug: 'educational-toys', description: 'Learning and science toys', icon: '🔬', ageGroups: ['3-5', '6-8', '9-12'] },
-  { name: 'Arts & Crafts', slug: 'arts-crafts', description: 'Art supplies, craft kits, and creative toys', icon: '🎨', ageGroups: ['3-5', '6-8', '9-12'] },
-  { name: 'Dolls & Plush', slug: 'dolls-plush', description: 'Fashion dolls, stuffed animals, and plush toys', icon: '🧸', ageGroups: ['0-2', '3-5', '6-8'] },
-  { name: 'Vehicles & Remote Control', slug: 'vehicles-rc', description: 'Toy cars, RC vehicles, and train sets', icon: '🚗', ageGroups: ['3-5', '6-8', '9-12'] },
-  { name: 'Board Games & Puzzles', slug: 'board-games', description: 'Family board games, card games, and puzzles', icon: '🎲', ageGroups: ['3-5', '6-8', '9-12', '13+'] },
-  { name: 'Baby & Toddler Toys', slug: 'baby-toys', description: 'Safe toys for babies and toddlers', icon: '🍼', ageGroups: ['0-2', '3-5'] },
-  { name: 'Electronic & Interactive Toys', slug: 'electronic-toys', description: 'Electronic games, virtual pets, and interactive toys', icon: '🎮', ageGroups: ['5-8', '9-12', '13+'] },
+  { name: 'Building & Construction Toys', slug: 'building-toys', description: 'LEGO, Mega Bloks, and building sets', icon: '🧱', image: 'https://images.unsplash.com/photo-1587654780291-39c9404d7dd0?w=200&h=200&fit=crop', ageGroups: ['3-5', '6-8', '9-12'] },
+  { name: 'Action Figures & Collectibles', slug: 'action-figures', description: 'Action figures, dolls, and collectible toys', icon: '🦸', image: 'https://images.unsplash.com/photo-1594787318286-3d835c1d207f?w=200&h=200&fit=crop', ageGroups: ['4-7', '8-12', '13+'] },
+  { name: 'Outdoor & Sports Toys', slug: 'outdoor-toys', description: 'Toys for outdoor play and sports', icon: '⚽', image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=200&h=200&fit=crop', ageGroups: ['3-5', '6-8', '9-12'] },
+  { name: 'Educational & STEM Toys', slug: 'educational-toys', description: 'Learning and science toys', icon: '🔬', image: 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=200&h=200&fit=crop', ageGroups: ['3-5', '6-8', '9-12'] },
+  { name: 'Arts & Crafts', slug: 'arts-crafts', description: 'Art supplies, craft kits, and creative toys', icon: '🎨', image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=200&h=200&fit=crop', ageGroups: ['3-5', '6-8', '9-12'] },
+  { name: 'Dolls & Plush', slug: 'dolls-plush', description: 'Fashion dolls, stuffed animals, and plush toys', icon: '🧸', image: 'https://images.unsplash.com/photo-1559715541-5daf8a0296d0?w=200&h=200&fit=crop', ageGroups: ['0-2', '3-5', '6-8'] },
+  { name: 'Vehicles & Remote Control', slug: 'vehicles-rc', description: 'Toy cars, RC vehicles, and train sets', icon: '🚗', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200&h=200&fit=crop', ageGroups: ['3-5', '6-8', '9-12'] },
+  { name: 'Board Games & Puzzles', slug: 'board-games', description: 'Family board games, card games, and puzzles', icon: '🎲', image: 'https://images.unsplash.com/photo-1606503153255-59d8b2e4b9e4?w=200&h=200&fit=crop', ageGroups: ['3-5', '6-8', '9-12', '13+'] },
+  { name: 'Baby & Toddler Toys', slug: 'baby-toys', description: 'Safe toys for babies and toddlers', icon: '🍼', image: 'https://images.unsplash.com/photo-1545486332-9e0999c535b2?w=200&h=200&fit=crop', ageGroups: ['0-2', '3-5'] },
+  { name: 'Electronic & Interactive Toys', slug: 'electronic-toys', description: 'Electronic games, virtual pets, and interactive toys', icon: '🎮', image: 'https://images.unsplash.com/photo-1629236714692-9dddb8596d7f?w=200&h=200&fit=crop', ageGroups: ['5-8', '9-12', '13+'] },
 ];
+
+const productImages: Record<string, string> = {
+  'lego-city-fire-station': 'https://images.unsplash.com/photo-1587654780291-39c9404d7dd0?w=600&h=600&fit=crop',
+  'lego-creator-dinosaurs': 'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=600&h=600&fit=crop',
+  'hot-wheels-ultimate-garage': 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=600&fit=crop',
+  'hot-wheels-20-pack': 'https://images.unsplash.com/photo-1597404294079-407d70997db4?w=600&h=600&fit=crop',
+  'barbie-dreamhouse': 'https://images.unsplash.com/photo-1559715541-5daf8a0296d0?w=600&h=600&fit=crop',
+  'barbie-fashionista': 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&h=600&fit=crop',
+  'fisher-price-smart-chair': 'https://images.unsplash.com/photo-1545486332-9e0999c535b2?w=600&h=600&fit=crop',
+  'nerf-elite-commander': 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600&h=600&fit=crop',
+  'nerf-rival-perses': 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=600&h=600&fit=crop',
+  'play-doh-mega-pack': 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&h=600&fit=crop',
+  'crayola-64-crayons': 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&h=600&fit=crop',
+  'tamagotchi-original': 'https://images.unsplash.com/photo-1629236714692-9dddb8596d7f?w=600&h=600&fit=crop',
+  'mega-bloks-first-builders': 'https://images.unsplash.com/photo-1587654780291-39c9404d7dd0?w=600&h=600&fit=crop',
+  'funskool-games-combo': 'https://images.unsplash.com/photo-1606503153255-59d8b2e4b9e4?w=600&h=600&fit=crop',
+  'lego-star-wars-falcon': 'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=600&h=600&fit=crop',
+  'hot-wheels-track-builder': 'https://images.unsplash.com/photo-1597404294079-407d70997db4?w=600&h=600&fit=crop',
+  'crayola-finger-paints': 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&h=600&fit=crop',
+  'fisher-price-rock-stack': 'https://images.unsplash.com/photo-1545486332-9e0999c535b2?w=600&h=600&fit=crop',
+};
 
 const products = [
   { name: 'LEGO City Fire Station Set', slug: 'lego-city-fire-station', sku: 'LEG-CITY-001', price: 8999, salePrice: 7999, description: 'Build and play with the LEGO City Fire Station! Includes fire truck, firefighter minifigures, and a burning building.', shortDescription: 'LEGO City Fire Station with minifigures', brand: 'lego', category: 'building-toys', ageMin: 6, ageMax: 12, stock: 25, isFeatured: true, isBestSeller: true, tags: ['lego', 'city', 'fire', 'building'], material: ['Plastic'], color: ['Red', 'Black', 'Yellow'] },
@@ -67,10 +88,10 @@ const coupons = [
 ];
 
 const banners = [
-  { title: 'Summer Toy Sale!', subtitle: 'Up to 30% off on outdoor toys', link: '/shop?category=outdoor-toys', linkType: 'category', position: 'hero', sortOrder: 1, image: { url: 'https://placehold.co/1200x500/f43f5e/white?text=Summer+Toy+Sale', publicId: 'banner-summer-sale' } },
-  { title: 'New LEGO Arrivals', subtitle: 'Check out the latest LEGO sets', link: '/shop?search=lego', linkType: 'custom', position: 'hero', sortOrder: 2, image: { url: 'https://placehold.co/1200x500/3b82f6/white?text=New+LEGO+Arrivals', publicId: 'banner-lego-new' } },
-  { title: 'Free Delivery', subtitle: 'On orders above Rs. 3,000', link: '/shop', linkType: 'custom', position: 'mid', sortOrder: 1, image: { url: 'https://placehold.co/600x300/10b981/white?text=Free+Delivery', publicId: 'banner-free-delivery' } },
-  { title: 'STEM Learning', subtitle: 'Educational toys for smart kids', link: '/shop?category=educational-toys', linkType: 'category', position: 'mid', sortOrder: 2, image: { url: 'https://placehold.co/600x300/8b5cf6/white?text=STEM+Learning', publicId: 'banner-stem' } },
+  { title: 'Summer Toy Sale!', subtitle: 'Up to 30% off on outdoor toys', link: '/shop?category=outdoor-toys', linkType: 'category', position: 'hero', sortOrder: 1, isActive: true, image: { url: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=1200&h=500&fit=crop', publicId: 'banner-summer-sale' } },
+  { title: 'New LEGO Arrivals', subtitle: 'Check out the latest LEGO sets', link: '/shop?search=lego', linkType: 'custom', position: 'hero', sortOrder: 2, isActive: true, image: { url: 'https://images.unsplash.com/photo-1587654780291-39c9404d7dd0?w=1200&h=500&fit=crop', publicId: 'banner-lego-new' } },
+  { title: 'Free Delivery', subtitle: 'On orders above Rs. 3,000', link: '/shop', linkType: 'custom', position: 'mid', sortOrder: 1, isActive: true, image: { url: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=600&h=300&fit=crop', publicId: 'banner-free-delivery' } },
+  { title: 'STEM Learning', subtitle: 'Educational toys for smart kids', link: '/shop?category=educational-toys', linkType: 'category', position: 'mid', sortOrder: 2, isActive: true, image: { url: 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=600&h=300&fit=crop', publicId: 'banner-stem' } },
 ];
 
 async function seed() {
@@ -79,7 +100,6 @@ async function seed() {
     await mongoose.connect(MONGODB_URI);
     console.log('✅ Connected to MongoDB\n');
 
-    // Clear existing data
     console.log('🗑️  Clearing existing data...');
     await Promise.all([
       User.deleteMany({}),
@@ -91,7 +111,6 @@ async function seed() {
     ]);
     console.log('✅ Cleared all collections\n');
 
-    // Create users
     console.log('👤 Creating users...');
     const users = await User.insertMany([
       {
@@ -159,21 +178,17 @@ async function seed() {
     const customer2 = users[2];
     console.log(`  ✅ Created ${users.length} users (admin@toystore.pk / Admin@123)`);
 
-    // Create brands
     console.log('🏷️  Creating brands...');
     const createdBrands = await Brand.insertMany(brands);
     console.log(`  ✅ Created ${createdBrands.length} brands`);
 
-    // Create categories
     console.log('📂 Creating categories...');
     const createdCategories = await Category.insertMany(categories);
     console.log(`  ✅ Created ${createdCategories.length} categories`);
 
-    // Map brand/category slugs to IDs
     const brandMap = Object.fromEntries(createdBrands.map((b) => [b.slug, b._id]));
     const categoryMap = Object.fromEntries(createdCategories.map((c) => [c.slug, c._id]));
 
-    // Create products
     console.log('🧸 Creating products...');
     const createdProducts = await Product.insertMany(
       products.map((p) => ({
@@ -183,14 +198,13 @@ async function seed() {
         costPrice: Math.round(p.price * 0.6),
         ageRange: { min: p.ageMin, max: p.ageMax },
         recommendedAge: p.ageMin,
-        images: [{ url: `https://placehold.co/600x600/f3f4f6/374151?text=${encodeURIComponent(p.name)}`, publicId: `product-${p.sku}` }],
+        images: [{ url: productImages[p.slug] || `https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=600&fit=crop`, publicId: `product-${p.sku}`, alt: p.name, isPrimary: true }],
         availableStock: p.stock,
         isActive: true,
       })),
     );
     console.log(`  ✅ Created ${createdProducts.length} products`);
 
-    // Create coupons
     console.log('🎟️  Creating coupons...');
     const now = new Date();
     const futureDate = new Date(now);
@@ -206,26 +220,22 @@ async function seed() {
     );
     console.log(`  ✅ Created ${createdCoupons.length} coupons`);
 
-    // Create banners
     console.log('🖼️  Creating banners...');
     const createdBanners = await Banner.insertMany(
       banners.map((b) => ({
         ...b,
-        isActive: true,
         startDate: now,
         endDate: futureDate,
       })),
     );
     console.log(`  ✅ Created ${createdBanners.length} banners`);
 
-    // Update product counts on categories
     console.log('📊 Updating category product counts...');
     for (const cat of createdCategories) {
       const count = createdProducts.filter((p) => p.category.toString() === cat._id.toString()).length;
       await Category.findByIdAndUpdate(cat._id, { productCount: count });
     }
 
-    // Update product counts on brands
     console.log('📊 Updating brand product counts...');
     for (const brand of createdBrands) {
       const count = createdProducts.filter((p) => p.brand.toString() === brand._id.toString()).length;
