@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Minus, Trash2, Heart, X } from 'lucide-react'
+import { Plus, Minus, Trash2, Heart, X, Truck } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useGetCartQuery, useUpdateCartItemMutation, useRemoveFromCartMutation, useClearCartMutation, useApplyCouponMutation, useRemoveCouponMutation } from '../app/services/cart'
 import { useAddToWishlistMutation, useCreateWishlistMutation, useGetWishlistsQuery } from '../app/services/wishlist'
@@ -34,8 +34,11 @@ export default function CartPage() {
   }
 
   const subtotal = cart?.totalAmount || 0
-  const shipping = subtotal >= 3000 ? 0 : 200
+  const freeShippingThreshold = 3000
+  const shipping = subtotal >= freeShippingThreshold ? 0 : 200
   const total = subtotal + shipping - (cart?.couponDiscount || 0)
+  const freeShippingProgress = Math.min(100, (subtotal / freeShippingThreshold) * 100)
+  const amountToFreeShipping = Math.max(0, freeShippingThreshold - subtotal)
 
   const onSaveForLater = async (itemId: string, productId: string) => {
     try {
@@ -80,7 +83,27 @@ export default function CartPage() {
 
   return (
     <div className="container-toy py-8">
-      <h1 className="font-display text-2xl font-semibold mb-6">Shopping Cart</h1>
+      <h1 className="font-display text-2xl font-semibold mb-4">Shopping Cart</h1>
+
+      {/* Free shipping progress bar */}
+      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4">
+        {subtotal >= freeShippingThreshold ? (
+          <div className="flex items-center gap-2 text-sm text-green-600">
+            <Truck className="h-5 w-5" />
+            <span className="font-medium">You qualify for free delivery!</span>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Add <span className="font-semibold text-blue-600">Rs. {amountToFreeShipping.toLocaleString()}</span> more for free delivery</span>
+              <span className="font-medium text-gray-900">Rs. {subtotal.toLocaleString()} / Rs. {freeShippingThreshold.toLocaleString()}</span>
+            </div>
+            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-gray-200">
+              <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500" style={{ width: `${freeShippingProgress}%` }} />
+            </div>
+          </>
+        )}
+      </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
