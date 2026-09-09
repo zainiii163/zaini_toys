@@ -59,7 +59,13 @@ export default function ProductDetailPage() {
 
   const product = productData.data
   const images = product.images || []
+  const videos = (product as any).videos || []
+  const allMedia = [
+    ...images.map((img: any, i: number) => ({ type: 'image' as const, url: img.url, index: i })),
+    ...videos.map((vid: any, i: number) => ({ type: 'video' as const, url: vid.url, index: images.length + i })),
+  ]
   const mainImg = images[galleryIdx]?.url || ''
+  const mainVideo = galleryIdx >= images.length ? videos[galleryIdx - images.length] : null
   const price = product.salePrice ?? product.price
   const original = product.salePrice ? product.price : null
   const discount = original ? Math.round(((original - price) / original) * 100) : 0
@@ -146,42 +152,61 @@ export default function ProductDetailPage() {
         {/* Gallery */}
         <div>
           <div
-            className="relative aspect-square rounded-2xl border border-gray-200 bg-white overflow-hidden cursor-crosshair"
+            className="relative aspect-square rounded-2xl border border-gray-200 bg-white overflow-hidden"
             onMouseMove={(e) => {
+              if (mainVideo) return
               const rect = e.currentTarget.getBoundingClientRect()
               setZoomPos({ x: ((e.clientX - rect.left) / rect.width) * 100, y: ((e.clientY - rect.top) / rect.height) * 100 })
             }}
             onMouseLeave={() => setZoomPos(null)}
           >
-            <img
-              src={mainImg}
-              alt={product.name}
-              className="h-full w-full object-cover"
-              style={zoomPos ? { transform: 'scale(1.5)', transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
-            />
+            {mainVideo ? (
+              <video
+                src={mainVideo.url}
+                controls
+                className="h-full w-full object-cover"
+                poster={images[0]?.url}
+              />
+            ) : (
+              <img
+                src={mainImg}
+                alt={product.name}
+                className="h-full w-full object-cover cursor-crosshair"
+                style={zoomPos ? { transform: 'scale(1.5)', transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
+              />
+            )}
             {discount > 0 && (
               <span className="absolute left-3 top-3 rounded-lg bg-red-500 px-2.5 py-1 text-xs font-bold text-white">-{discount}%</span>
             )}
             {product.isNewArrival && (
               <span className="absolute right-3 top-3 rounded-lg bg-teal-500 px-2.5 py-1 text-xs font-bold text-white">NEW</span>
             )}
-            {!zoomPos && images.length > 1 && (
+            {!zoomPos && !mainVideo && images.length > 1 && (
               <div className="absolute bottom-3 right-3 rounded-lg bg-black/50 px-2 py-1 text-xs text-white flex items-center gap-1">
                 <ZoomIn className="h-3 w-3" /> Hover to zoom
               </div>
             )}
           </div>
-          {images.length > 1 && (
+          {allMedia.length > 1 && (
             <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
-              {images.map((img: any, i: number) => (
+              {allMedia.map((media, i) => (
                 <button
                   key={i}
-                  onClick={() => setGalleryIdx(i)}
-                  className={`flex-shrink-0 h-20 w-20 rounded-lg border-2 overflow-hidden transition-all ${
+                  onClick={() => setGalleryIdx(media.index)}
+                  className={`relative flex-shrink-0 h-20 w-20 rounded-lg border-2 overflow-hidden transition-all ${
                     i === galleryIdx ? 'border-blue-500 ring-2 ring-blue-200' : 'border-transparent hover:border-gray-300'
                   }`}
                 >
-                  <img src={img.url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
+                  {media.type === 'video' ? (
+                    <>
+                      <img src={images[0]?.url || ''} alt="Video" className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                        <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                      </div>
+                    </>
+                  ) : (
+                    <img src={media.url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
+                  )}
                 </button>
               ))}
             </div>
@@ -242,6 +267,18 @@ export default function ProductDetailPage() {
                 Out of Stock
               </span>
             )}
+          </div>
+
+          {/* Delivery Estimate */}
+          <div className="mt-3 rounded-xl bg-blue-50 p-3 text-sm">
+            <div className="flex items-center gap-2 text-blue-700 font-medium">
+              <Truck className="h-4 w-4" />
+              {product.availableStock > 0 ? (
+                <span>Estimated delivery: <strong>3-5 business days</strong> (Standard) or <strong>1-2 days</strong> (Express)</span>
+              ) : (
+                <span>This item is currently out of stock</span>
+              )}
+            </div>
           </div>
 
           {/* Qty & Add to Cart */}

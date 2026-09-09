@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Package, ShoppingCart, Users, Tag, Layers, Image, Zap, Settings, Percent, LifeBuoy, LogOut, ChevronLeft, ChevronRight, Shield, Clock, BarChart3, FileText, Bell } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Users, Tag, Layers, Image, Zap, Settings, Percent, LifeBuoy, LogOut, ChevronLeft, ChevronRight, Shield, Clock, BarChart3, FileText, Bell, BoxSelect } from 'lucide-react'
 import { useState } from 'react'
 import { useLogoutMutation } from '../app/services/auth'
 import { useAppDispatch } from '../hooks/typed'
@@ -22,6 +22,8 @@ const NAV = [
   { to: '/team', label: 'Team', icon: Shield },
   { to: '/audit-log', label: 'Audit Log', icon: Clock },
   { to: '/reports', label: 'Reports', icon: BarChart3 },
+  { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { to: '/inventory-log', label: 'Inventory Log', icon: BoxSelect },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 
