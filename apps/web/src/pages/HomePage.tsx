@@ -14,6 +14,7 @@ import VideoSection from '../components/VideoSection'
 import AdBanner from '../components/AdBanner'
 import TestimonialSection from '../components/TestimonialSection'
 import NewsletterSection from '../components/NewsletterSection'
+import RecentlyViewed from '../components/RecentlyViewed'
 
 const AGE_SECTIONS = [
   { label: '0–12 Months', icon: Baby, ageMin: 0, ageMax: 1, color: 'bg-pink-50 text-pink-600', emoji: '👶' },
@@ -271,6 +272,9 @@ export default function HomePage() {
 
       {/* Newsletter */}
       <NewsletterSection />
+
+      {/* Recently Viewed */}
+      <RecentlyViewed />
     </div>
   )
 }

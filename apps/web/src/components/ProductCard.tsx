@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { ShoppingCart, Star } from 'lucide-react'
+import { ShoppingCart, Star, Eye } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { Product } from '../lib/types'
 import { useAddToCartMutation } from '../app/services/cart'
@@ -7,9 +7,10 @@ import { useAppSelector } from '../hooks/typed'
 
 interface Props {
   product: Product
+  onQuickView?: (product: Product) => void
 }
 
-export default function ProductCard({ product }: Props) {
+export default function ProductCard({ product, onQuickView }: Props) {
   const navigate = useNavigate()
   const auth = useAppSelector((s) => s.auth)
   const [addToCart] = useAddToCartMutation()
@@ -59,6 +60,15 @@ export default function ProductCard({ product }: Props) {
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-gray-400">No image</div>
+        )}
+        {onQuickView && (
+          <button
+            onClick={(e) => { e.preventDefault(); onQuickView(product) }}
+            className="absolute bottom-2 right-2 z-10 rounded-full bg-white/90 p-2 opacity-0 shadow transition-opacity group-hover:opacity-100 hover:bg-white"
+            title="Quick view"
+          >
+            <Eye className="h-4 w-4 text-gray-700" />
+          </button>
         )}
       </div>
 

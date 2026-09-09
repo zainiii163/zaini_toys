@@ -23,6 +23,8 @@ import SettingsPage from './pages/SettingsPage'
 import TeamPage from './pages/TeamPage'
 import AuditLogPage from './pages/AuditLogPage'
 import ReportsPage from './pages/ReportsPage'
+import BlogManagerPage from './pages/BlogManagerPage'
+import NotificationsPage from './pages/NotificationsPage'
 
 function AuthBootstrap({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch()
@@ -71,6 +73,8 @@ const router = createBrowserRouter([
       { path: 'team', element: <TeamPage /> },
       { path: 'audit-log', element: <AuditLogPage /> },
       { path: 'reports', element: <ReportsPage /> },
+      { path: 'blog', element: <BlogManagerPage /> },
+      { path: 'notifications', element: <NotificationsPage /> },
       { index: true, element: <DashboardPage /> },
     ],
   },

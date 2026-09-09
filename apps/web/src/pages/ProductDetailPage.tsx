@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Heart, Star, Truck, ShieldCheck, Share2, Minus, Plus, ChevronRight, ZoomIn, Copy } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -8,6 +8,7 @@ import { useAddToCartMutation } from '../app/services/cart'
 import { useAddToWishlistMutation, useCreateWishlistMutation, useGetWishlistsQuery } from '../app/services/wishlist'
 import { useAppSelector } from '../hooks/typed'
 import ProductCard from '../components/ProductCard'
+import { addToRecentlyViewed } from '../lib/recentlyViewed'
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -104,6 +105,12 @@ export default function ProductDetailPage() {
   }
 
   const lowStock = product.availableStock > 0 && product.availableStock <= 5
+
+  useEffect(() => {
+    if (product) {
+      addToRecentlyViewed(product as any)
+    }
+  }, [product])
 
   return (
     <div className="container-toy py-8">

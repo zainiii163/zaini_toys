@@ -29,6 +29,7 @@ import SupportPage from './pages/SupportPage'
 import TicketDetailPage from './pages/TicketDetailPage'
 import GiftFinderPage from './pages/GiftFinderPage'
 import ComparePage from './pages/ComparePage'
+import SizeGuidePage from './pages/SizeGuidePage'
 
 // Bootstrap component to validate session on first load
 function AuthBootstrap({ children }: { children: React.ReactNode }) {
@@ -81,6 +82,7 @@ export const router = createBrowserRouter([
       { path: 'compare', element: <ComparePage /> },
       { path: 'support', element: <SupportPage /> },
       { path: 'support/:id', element: <TicketDetailPage /> },
+      { path: 'size-guide', element: <SizeGuidePage /> },
       {
         path: 'account',
         element: <AccountPage />,
