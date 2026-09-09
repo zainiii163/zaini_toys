@@ -23,6 +23,12 @@ import PrivacyPage from './pages/PrivacyPage'
 import ContactPage from './pages/ContactPage'
 import AboutPage from './pages/AboutPage'
 import FaqPage from './pages/FaqPage'
+import BlogPage from './pages/BlogPage'
+import BlogPostPage from './pages/BlogPostPage'
+import SupportPage from './pages/SupportPage'
+import TicketDetailPage from './pages/TicketDetailPage'
+import GiftFinderPage from './pages/GiftFinderPage'
+import ComparePage from './pages/ComparePage'
 
 // Bootstrap component to validate session on first load
 function AuthBootstrap({ children }: { children: React.ReactNode }) {
@@ -69,6 +75,12 @@ export const router = createBrowserRouter([
       { path: 'contact', element: <ContactPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'faq', element: <FaqPage /> },
+      { path: 'blog', element: <BlogPage /> },
+      { path: 'blog/:slug', element: <BlogPostPage /> },
+      { path: 'gift-finder', element: <GiftFinderPage /> },
+      { path: 'compare', element: <ComparePage /> },
+      { path: 'support', element: <SupportPage /> },
+      { path: 'support/:id', element: <TicketDetailPage /> },
       {
         path: 'account',
         element: <AccountPage />,
