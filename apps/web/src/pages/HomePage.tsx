@@ -15,6 +15,7 @@ import AdBanner from '../components/AdBanner'
 import TestimonialSection from '../components/TestimonialSection'
 import NewsletterSection from '../components/NewsletterSection'
 import RecentlyViewed from '../components/RecentlyViewed'
+import SEO from '../components/SEO'
 
 const AGE_SECTIONS = [
   { label: '0–12 Months', icon: Baby, ageMin: 0, ageMax: 1, color: 'bg-pink-50 text-pink-600', emoji: '👶' },
@@ -47,6 +48,11 @@ export default function HomePage() {
 
   return (
     <div>
+      <SEO
+        title="Fun, Safe Toys for Every Kid"
+        description="Pakistan's #1 online toy store. Educational, exciting, and age-appropriate toys with free delivery over Rs. 3,000."
+        keywords="toys Pakistan, online toys, educational toys, kids toys, baby toys, LEGO, remote control cars"
+      />
       {/* Hero Banner */}
       <section className="relative">
         {hero ? (

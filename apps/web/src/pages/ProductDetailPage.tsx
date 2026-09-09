@@ -11,6 +11,7 @@ import { useAppSelector } from '../hooks/typed'
 import ProductCard from '../components/ProductCard'
 import { addToRecentlyViewed } from '../lib/recentlyViewed'
 import PriceDropAlert from '../components/PriceDropAlert'
+import SEO from '../components/SEO'
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -128,6 +129,13 @@ export default function ProductDetailPage() {
 
   return (
     <div className="container-toy py-8">
+      <SEO
+        title={product.name}
+        description={product.shortDescription || product.description?.substring(0, 160)}
+        image={product.images?.[0]?.url}
+        type="product"
+        keywords={[product.name, product.brand?.name, product.category?.name].filter(Boolean).join(', ')}
+      />
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center gap-2 text-sm text-gray-500">
         <Link to="/" className="hover:text-blue-600">Home</Link>

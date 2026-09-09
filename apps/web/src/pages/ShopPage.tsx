@@ -6,6 +6,7 @@ import { useGetCategoryTreeQuery } from '../app/services/category'
 import { useGetBrandsQuery } from '../app/services/brand'
 import ProductCard from '../components/ProductCard'
 import SkeletonCard from '../components/SkeletonCard'
+import SEO from '../components/SEO'
 
 const SORTS = [
   { value: '', label: 'Relevance' },
@@ -144,6 +145,10 @@ export default function ShopPage() {
 
   return (
     <div className="container-toy py-8">
+      <SEO
+        title={query.search ? `Search: ${query.search}` : 'Shop All Toys'}
+        description="Browse our wide selection of educational, fun, and safe toys for kids of all ages. Free delivery on orders over Rs. 3,000."
+      />
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>

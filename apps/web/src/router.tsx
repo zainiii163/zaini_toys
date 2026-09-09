@@ -31,6 +31,8 @@ import GiftFinderPage from './pages/GiftFinderPage'
 import ComparePage from './pages/ComparePage'
 import SizeGuidePage from './pages/SizeGuidePage'
 import WholesalePage from './pages/WholesalePage'
+import StoreLocationsPage from './pages/StoreLocationsPage'
+import ReferralPage from './pages/ReferralPage'
 
 // Bootstrap component to validate session on first load
 function AuthBootstrap({ children }: { children: React.ReactNode }) {
@@ -85,6 +87,8 @@ export const router = createBrowserRouter([
       { path: 'support/:id', element: <TicketDetailPage /> },
       { path: 'size-guide', element: <SizeGuidePage /> },
       { path: 'wholesale', element: <WholesalePage /> },
+      { path: 'stores', element: <StoreLocationsPage /> },
+      { path: 'refer', element: <ReferralPage /> },
       {
         path: 'account',
         element: <AccountPage />,

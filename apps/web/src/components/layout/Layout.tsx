@@ -3,6 +3,7 @@ import Header from './Header'
 import Footer from './Footer'
 import SocialProof from '../SocialProof'
 import BackToTop from '../BackToTop'
+import LiveChat from '../LiveChat'
 
 export default function Layout() {
   return (
@@ -14,6 +15,7 @@ export default function Layout() {
       <Footer />
       <SocialProof />
       <BackToTop />
+      <LiveChat />
       <ScrollRestoration />
     </div>
   )
