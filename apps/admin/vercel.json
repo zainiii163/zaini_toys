@@ -1,4 +1,8 @@
 {
+  "installCommand": "cd ../.. && npm i -g pnpm && pnpm install",
+  "buildCommand": "pnpm build",
+  "framework": null,
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]

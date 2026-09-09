@@ -1,5 +1,4 @@
 import express, { Application } from 'express';
-import path from 'path';
 import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -47,7 +46,11 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173,http:
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || (isProd && !origin)) {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        (isProd && origin && origin.endsWith('.vercel.app'))
+      ) {
         callback(null, true);
       } else {
         callback(new AppError('Not allowed by CORS', 403));
@@ -104,27 +107,6 @@ app.use(`${API_PREFIX}/admin/users`, adminUserRoutes);
 app.get('/health', (_req, res) => {
   res.status(200).json({ success: true, data: { status: 'ok', timestamp: new Date().toISOString() } });
 });
-
-// Serve static frontends in production
-if (isProd) {
-  const webDist = path.join(__dirname, '../../web/dist');
-  const adminDist = path.join(__dirname, '../../admin/dist');
-
-  // Admin panel at /admin/*
-  app.use('/admin', express.static(adminDist));
-  app.get('/admin/*', (_req, res) => {
-    res.sendFile(path.join(adminDist, 'index.html'));
-  });
-
-  // Customer website at root
-  app.use(express.static(webDist));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api') || req.path.startsWith('/admin')) {
-      return next();
-    }
-    res.sendFile(path.join(webDist, 'index.html'));
-  });
-}
 
 // 404 handler
 app.all('*', (req, _res, next) => {

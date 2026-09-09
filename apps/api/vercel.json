@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "installCommand": "npm install -g pnpm && pnpm install",
-  "buildCommand": "pnpm --filter @toys/config build && pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build && pnpm --filter @toys/api build && mkdir -p public",
-  "outputDirectory": "public",
+  "installCommand": "cd ../.. && npm i -g pnpm && pnpm install",
+  "buildCommand": "cd ../.. && pnpm --filter @toys/config build && pnpm --filter @toys/types build && pnpm --filter @toys/validation build && pnpm --filter @toys/utils build",
   "framework": null,
+  "outputDirectory": "public",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.ts" }
+    { "source": "/api/v1/(.*)", "destination": "/api/index.ts" }
   ]
 }
