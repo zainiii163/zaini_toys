@@ -28,6 +28,7 @@ import NotificationsPage from './pages/NotificationsPage'
 import CustomerDetailPage from './pages/CustomerDetailPage'
 import InventoryLogPage from './pages/InventoryLogPage'
 import CouponAnalyticsPage from './pages/CouponAnalyticsPage'
+import ReturnsPage from './pages/ReturnsPage'
 
 function AuthBootstrap({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch()
@@ -64,6 +65,7 @@ const router = createBrowserRouter([
       { path: 'products/:id/edit', element: <ProductFormPage /> },
       { path: 'orders', element: <OrdersPage /> },
       { path: 'orders/:id', element: <OrderDetailPage /> },
+      { path: 'returns', element: <ReturnsPage /> },
       { path: 'customers', element: <CustomersPage /> },
       { path: 'customers/:id', element: <CustomerDetailPage /> },
       { path: 'categories', element: <CategoriesPage /> },

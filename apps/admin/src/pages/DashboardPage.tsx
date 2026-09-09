@@ -4,7 +4,8 @@ import { useGetUsersQuery } from '../app/services/user'
 import { useGetProductsQuery } from '../app/services/product'
 import { useGetCategoriesQuery } from '../app/services/category'
 import { useGetCouponsQuery } from '../app/services/coupon'
-import { DollarSign, ShoppingCart, Package, Users, AlertTriangle, Clock, TrendingUp, Star, Eye, BarChart3, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { DollarSign, ShoppingCart, Package, Users, AlertTriangle, Clock, TrendingUp, Star, Eye, BarChart3, ArrowUpRight, ArrowDownRight, RotateCcw } from 'lucide-react'
+import SalesByCategoryChart from '../components/SalesByCategoryChart'
 
 export default function DashboardPage() {
   const { data: ordersData, isLoading: ordersLoading } = useGetOrdersQuery({ limit: '10', sort: '-createdAt' })
@@ -167,8 +168,10 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Quick Actions + Alerts */}
+        {/* Sales by Category + Quick Actions */}
         <div className="space-y-6">
+          <SalesByCategoryChart />
+
           {/* Quick Actions */}
           <div className="stat-card">
             <h2 className="mb-4 font-semibold">Quick Actions</h2>
@@ -181,64 +184,14 @@ export default function DashboardPage() {
                 <ShoppingCart className="mx-auto mb-1 h-6 w-6 text-green-600" />
                 <p className="text-xs font-medium">Orders</p>
               </Link>
-              <Link to="/categories" className="rounded-xl border border-gray-200 p-3 text-center hover:bg-gray-50">
-                <BarChart3 className="mx-auto mb-1 h-6 w-6 text-purple-600" />
-                <p className="text-xs font-medium">Categories</p>
+              <Link to="/returns" className="rounded-xl border border-gray-200 p-3 text-center hover:bg-gray-50">
+                <RotateCcw className="mx-auto mb-1 h-6 w-6 text-orange-600" />
+                <p className="text-xs font-medium">Returns</p>
               </Link>
               <Link to="/coupons" className="rounded-xl border border-gray-200 p-3 text-center hover:bg-gray-50">
                 <DollarSign className="mx-auto mb-1 h-6 w-6 text-amber-600" />
                 <p className="text-xs font-medium">Coupons</p>
               </Link>
-            </div>
-          </div>
-
-          {/* Low Stock Alerts */}
-          <div className="stat-card">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-semibold text-sm">Low Stock Alerts</h2>
-              <Link to="/products" className="text-xs text-blue-600 hover:underline">View all</Link>
-            </div>
-            {lowStockProducts.length === 0 && outOfStockProducts.length === 0 ? (
-              <p className="py-4 text-center text-sm text-gray-500">All products well stocked</p>
-            ) : (
-              <div className="space-y-2">
-                {outOfStockProducts.slice(0, 3).map((p: any) => (
-                  <div key={p._id} className="flex items-center justify-between rounded-lg bg-red-50 px-3 py-2">
-                    <span className="text-xs font-medium text-red-700 line-clamp-1">{p.name}</span>
-                    <span className="text-xs font-bold text-red-600">Out</span>
-                  </div>
-                ))}
-                {lowStockProducts.slice(0, 3).map((p: any) => (
-                  <div key={p._id} className="flex items-center justify-between rounded-lg bg-amber-50 px-3 py-2">
-                    <span className="text-xs font-medium text-amber-700 line-clamp-1">{p.name}</span>
-                    <span className="text-xs font-bold text-amber-600">{p.availableStock} left</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Top Products */}
-          <div className="stat-card">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-semibold text-sm">Top Products</h2>
-              <Link to="/products" className="text-xs text-blue-600 hover:underline">View all</Link>
-            </div>
-            <div className="space-y-2">
-              {products
-                .sort((a: any, b: any) => (b.totalSold || 0) - (a.totalSold || 0))
-                .slice(0, 5)
-                .map((p: any) => (
-                  <div key={p._id} className="flex items-center gap-3">
-                    <img src={p.images?.[0]?.url} alt="" className="h-8 w-8 rounded-lg object-cover" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate">{p.name}</p>
-                      <p className="text-xs text-gray-500">{p.totalSold || 0} sold</p>
-                    </div>
-                    <span className="text-xs font-bold">Rs. {(p.salePrice || p.price)?.toLocaleString()}</span>
-                  </div>
-                ))}
-              {products.length === 0 && <p className="py-4 text-center text-sm text-gray-500">No products</p>}
             </div>
           </div>
         </div>

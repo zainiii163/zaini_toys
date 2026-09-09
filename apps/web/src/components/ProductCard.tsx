@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { ShoppingCart, Star, Eye } from 'lucide-react'
+import { ShoppingCart, Star, Eye, ArrowLeftRight, Share2, MessageCircle, Link as LinkIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { Product } from '../lib/types'
 import { useAddToCartMutation } from '../app/services/cart'
@@ -8,9 +8,11 @@ import { useAppSelector } from '../hooks/typed'
 interface Props {
   product: Product
   onQuickView?: (product: Product) => void
+  onCompare?: (product: Product) => void
+  compareIds?: string[]
 }
 
-export default function ProductCard({ product, onQuickView }: Props) {
+export default function ProductCard({ product, onQuickView, onCompare, compareIds = [] }: Props) {
   const navigate = useNavigate()
   const auth = useAppSelector((s) => s.auth)
   const [addToCart] = useAddToCartMutation()
@@ -20,8 +22,12 @@ export default function ProductCard({ product, onQuickView }: Props) {
   const original = product.salePrice ? product.price : null
   const discount = original ? Math.round(((original - price) / original) * 100) : 0
 
+  const isComparing = compareIds.includes(product._id)
+  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/product/${product.slug}` : ''
+
   const onAdd = async (e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     if (!auth.isAuthenticated) {
       navigate('/login', { state: { from: `/product/${product.slug}` } })
       return
@@ -32,6 +38,19 @@ export default function ProductCard({ product, onQuickView }: Props) {
     } catch (err: any) {
       toast.error(err?.data?.error || 'Failed to add to cart')
     }
+  }
+
+  const onCompareClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (onCompare) onCompare(product)
+  }
+
+  const onShare = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    navigator.clipboard.writeText(shareUrl)
+    toast.success('Link copied!')
   }
 
   return (
@@ -61,15 +80,43 @@ export default function ProductCard({ product, onQuickView }: Props) {
         ) : (
           <div className="flex h-full w-full items-center justify-center text-gray-400">No image</div>
         )}
-        {onQuickView && (
+        <div className="absolute bottom-2 right-2 z-10 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+          {onQuickView && (
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onQuickView(product) }}
+              className="rounded-full bg-white/90 p-2 shadow hover:bg-white"
+              title="Quick view"
+            >
+              <Eye className="h-4 w-4 text-gray-700" />
+            </button>
+          )}
+          {onCompare && (
+            <button
+              onClick={onCompareClick}
+              className={`rounded-full p-2 shadow ${isComparing ? 'bg-purple-600 text-white' : 'bg-white/90 text-gray-700 hover:bg-white'}`}
+              title={isComparing ? 'Remove from compare' : 'Add to compare'}
+            >
+              <ArrowLeftRight className="h-4 w-4" />
+            </button>
+          )}
           <button
-            onClick={(e) => { e.preventDefault(); onQuickView(product) }}
-            className="absolute bottom-2 right-2 z-10 rounded-full bg-white/90 p-2 opacity-0 shadow transition-opacity group-hover:opacity-100 hover:bg-white"
-            title="Quick view"
+            onClick={onShare}
+            className="rounded-full bg-white/90 p-2 shadow hover:bg-white"
+            title="Copy link"
           >
-            <Eye className="h-4 w-4 text-gray-700" />
+            <Share2 className="h-4 w-4 text-gray-700" />
           </button>
-        )}
+          <a
+            href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${product.name}! ${shareUrl}`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="rounded-full bg-white/90 p-2 shadow hover:bg-white"
+            title="Share on WhatsApp"
+          >
+            <MessageCircle className="h-4 w-4 text-green-600" />
+          </a>
+        </div>
       </div>
 
       <div className="flex flex-1 flex-col p-4">
