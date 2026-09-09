@@ -10,6 +10,7 @@ import { useAddToWishlistMutation, useCreateWishlistMutation, useGetWishlistsQue
 import { useAppSelector } from '../hooks/typed'
 import ProductCard from '../components/ProductCard'
 import { addToRecentlyViewed } from '../lib/recentlyViewed'
+import PriceDropAlert from '../components/PriceDropAlert'
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -319,6 +320,11 @@ export default function ProductDetailPage() {
             <Link to={`/compare`} className="flex items-center gap-1 text-sm text-gray-600 hover:text-purple-600">
               Compare
             </Link>
+          </div>
+
+          {/* Price Drop Alert */}
+          <div className="mt-3">
+            <PriceDropAlert productId={product._id} productName={product.name} currentPrice={price} />
           </div>
 
           {/* Benefits */}

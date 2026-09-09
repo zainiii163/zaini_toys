@@ -26,6 +26,8 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(1)
   const [paymentMethod, setPaymentMethod] = useState('cod')
   const [shippingMethod, setShippingMethod] = useState<'standard' | 'express' | 'same_day'>('standard')
+  const [giftWrap, setGiftWrap] = useState(false)
+  const [giftMessage, setGiftMessage] = useState('')
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
   const [newAddress, setNewAddress] = useState({
     label: 'Home',
@@ -64,7 +66,8 @@ export default function CheckoutPage() {
   const subtotal = cart?.totalAmount || 0
   const discount = cart?.couponDiscount || 0
   const shipping = shippingMethod === 'standard' && subtotal >= 3000 ? 0 : SHIPPING_METHODS.find((s) => s.id === shippingMethod)?.price || 0
-  const total = subtotal + shipping - discount
+  const giftWrapFee = giftWrap ? 150 : 0
+  const total = subtotal + shipping + giftWrapFee - discount
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -217,6 +220,28 @@ export default function CheckoutPage() {
           </div>
         </div>
 
+        {/* Gift Wrap */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">Gift Options</h3>
+          <label className={`flex cursor-pointer items-center justify-between rounded-xl border-2 p-4 transition-colors ${giftWrap ? 'border-pink-500 bg-pink-50' : 'border-gray-200 hover:border-gray-300'}`}>
+            <div className="flex items-center gap-3">
+              <input type="checkbox" checked={giftWrap} onChange={(e) => setGiftWrap(e.target.checked)} className="rounded" />
+              <div>
+                <p className="font-medium">🎁 Gift Wrapping</p>
+                <p className="text-xs text-gray-500">Beautiful包装 with ribbon & gift tag</p>
+              </div>
+            </div>
+            <span className="font-semibold text-pink-600">+Rs. 150</span>
+          </label>
+          {giftWrap && (
+            <div className="mt-3">
+              <label className="mb-1 block text-sm font-medium">Gift Message (optional)</label>
+              <textarea value={giftMessage} onChange={(e) => setGiftMessage(e.target.value)} rows={2} className="input-toy w-full" placeholder="Write a personal message for the gift tag..." maxLength={200} />
+              <p className="mt-1 text-xs text-gray-400">{giftMessage.length}/200 characters</p>
+            </div>
+          )}
+        </div>
+
         <button onClick={() => setStep(2)} className="btn-primary w-full">Continue to Payment</button>
       </div>
     )
@@ -285,7 +310,7 @@ export default function CheckoutPage() {
             <div className="flex justify-between"><span>Subtotal</span><span>Rs. {subtotal.toLocaleString()}</span></div>
             {discount > 0 && <div className="flex justify-between text-green-600"><span>Discount</span><span>-Rs. {discount.toLocaleString()}</span></div>}
             <div className="flex justify-between"><span>Shipping</span><span>{shipping === 0 ? 'Free' : `Rs. ${shipping.toLocaleString()}`}</span></div>
-            <hr className="border-gray-200" />
+            {giftWrap && <div className="flex justify-between text-pink-600"><span>🎁 Gift Wrapping</span><span>Rs. 150</span></div>}
             <div className="flex justify-between text-lg font-bold"><span>Total</span><span>Rs. {total.toLocaleString()}</span></div>
           </div>
         </div>
