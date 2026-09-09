@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Eye } from 'lucide-react'
+import { Search, Eye, Download } from 'lucide-react'
 import { useGetOrdersQuery, useUpdateOrderStatusMutation } from '../app/services/order'
 import { formatDate } from '../lib/utils'
+import { exportToCSV, ordersToCSV } from '../lib/exportCSV'
 
 const STATUSES = ['pending', 'confirmed', 'processing', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'cancelled']
 
@@ -17,9 +18,20 @@ export default function OrdersPage() {
     await updateStatus({ id: orderId, status: newStatus })
   }
 
+  const handleExport = () => {
+    const orders = data?.data || []
+    if (orders.length === 0) return
+    exportToCSV(ordersToCSV(orders), `orders-${new Date().toISOString().slice(0, 10)}`)
+  }
+
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold">Orders</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Orders</h1>
+        <button onClick={handleExport} className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50">
+          <Download className="h-4 w-4" /> Export CSV
+        </button>
+      </div>
 
       <div className="stat-card mb-6 flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Search, Trash2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Search, Trash2, Eye } from 'lucide-react'
 import { useGetUsersQuery, useDeleteUserMutation, useUpdateUserMutation, useToggleBlockUserMutation } from '../app/services/user'
 import { formatDate } from '../lib/utils'
 
@@ -41,7 +42,7 @@ export default function CustomersPage() {
               {data?.data?.map((u: any) => (
                 <tr key={u._id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
-                    <p className="font-medium">{u.name}</p>
+                    <Link to={`/customers/${u._id}`} className="font-medium hover:text-blue-600 hover:underline">{u.name}</Link>
                     <p className="text-xs text-gray-500">{u.email || u.phone}</p>
                   </td>
                   <td className="px-4 py-3">
@@ -52,6 +53,9 @@ export default function CustomersPage() {
                   <td className="px-4 py-3 text-sm">{u.loyaltyTier} ({u.loyaltyPoints} pts)</td>
                   <td className="px-4 py-3 text-gray-500">{formatDate(u.createdAt)}</td>
                   <td className="flex items-center gap-2 px-4 py-3">
+                    <Link to={`/customers/${u._id}`} className="rounded p-1 hover:bg-blue-50" title="View details">
+                      <Eye className="h-4 w-4 text-blue-600" />
+                    </Link>
                     <button onClick={() => handleToggleActive(u._id, u.isActive)} className={`rounded px-2 py-1 text-xs font-medium ${u.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                       {u.isActive ? 'Active' : 'Inactive'}
                     </button>

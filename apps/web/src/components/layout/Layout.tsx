@@ -2,6 +2,7 @@ import { Outlet, ScrollRestoration } from 'react-router-dom'
 import Header from './Header'
 import Footer from './Footer'
 import SocialProof from '../SocialProof'
+import BackToTop from '../BackToTop'
 
 export default function Layout() {
   return (
@@ -12,6 +13,7 @@ export default function Layout() {
       </main>
       <Footer />
       <SocialProof />
+      <BackToTop />
       <ScrollRestoration />
     </div>
   )

@@ -1,15 +1,25 @@
 import { useState } from 'react'
 import { Mail } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { api } from '../app/api'
 
 export default function NewsletterSection() {
   const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email) return
-    toast.success('Subscribed! Check your inbox for a welcome discount.')
-    setEmail('')
+    setLoading(true)
+    try {
+      await api.post('/newsletter', { email })
+      toast.success('Subscribed! Check your inbox for a welcome discount.')
+      setEmail('')
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || 'Failed to subscribe'
+      toast.error(msg)
+    }
+    setLoading(false)
   }
 
   return (
@@ -31,8 +41,8 @@ export default function NewsletterSection() {
               required
             />
           </div>
-          <button type="submit" className="btn-primary">
-            Subscribe
+          <button type="submit" disabled={loading} className="btn-primary">
+            {loading ? 'Subscribing...' : 'Subscribe'}
           </button>
         </form>
       </div>

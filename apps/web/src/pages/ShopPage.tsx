@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, Star } from 'lucide-react'
+import { useSearchParams, Link } from 'react-router-dom'
+import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, Star, LayoutGrid, List, ShoppingCart } from 'lucide-react'
 import { useGetProductsQuery } from '../app/services/product'
 import { useGetCategoryTreeQuery } from '../app/services/category'
 import { useGetBrandsQuery } from '../app/services/brand'
@@ -51,6 +51,7 @@ export default function ShopPage() {
   const [params, setParams] = useSearchParams()
   const [searchInput, setSearchInput] = useState(params.get('search') || '')
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const query = {
     page: Number(params.get('page')) || 1,
@@ -338,6 +339,19 @@ export default function ShopPage() {
 
         {/* Products grid */}
         <div className="flex-1">
+          {/* View toggle + results count */}
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-sm text-gray-500">{pagination?.total || products.length} products</p>
+            <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white p-1">
+              <button onClick={() => setViewMode('grid')} className={`rounded-md p-1.5 ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}>
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button onClick={() => setViewMode('list')} className={`rounded-md p-1.5 ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}>
+                <List className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
           {isLoading ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
@@ -349,9 +363,45 @@ export default function ShopPage() {
               <p className="text-sm text-gray-500">Try adjusting your search or filters.</p>
               <button onClick={clearAllFilters} className="btn-primary mt-4">Clear Filters</button>
             </div>
-          ) : (
+          ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               {products.map((p) => <ProductCard key={p._id} product={p} />)}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {products.map((p) => {
+                const image = p.images?.find((i: any) => i.isPrimary)?.url || p.images?.[0]?.url || ''
+                const price = p.salePrice ?? p.price
+                const original = p.salePrice ? p.price : null
+                const discount = original ? Math.round(((original - price) / original) * 100) : 0
+                return (
+                  <Link key={p._id} to={`/product/${p.slug}`} className="card-toy flex gap-4 p-4 transition-shadow hover:shadow-md">
+                    <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                      {image && <img src={image} alt={p.name} className="h-full w-full object-cover" loading="lazy" />}
+                      {discount > 0 && <span className="absolute left-2 top-2 rounded bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white">-{discount}%</span>}
+                    </div>
+                    <div className="flex flex-1 flex-col">
+                      <p className="text-xs font-medium text-blue-600">{p.brand?.name || 'Generic'}</p>
+                      <h3 className="mt-0.5 font-medium text-gray-900">{p.name}</h3>
+                      <div className="mt-1 flex items-center gap-1">
+                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                        <span className="text-xs text-gray-600">{p.averageRating?.toFixed(1) || '0.0'}</span>
+                        <span className="text-xs text-gray-400">({p.totalReviews || 0})</span>
+                      </div>
+                      <div className="mt-auto flex items-center justify-between pt-2">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-lg font-bold text-gray-900">Rs. {price.toLocaleString()}</span>
+                          {original && <span className="text-sm text-gray-400 line-through">Rs. {original.toLocaleString()}</span>}
+                        </div>
+                        <span className={`text-xs font-medium ${p.availableStock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {p.availableStock > 0 ? `${p.availableStock} in stock` : 'Out of stock'}
+                        </span>
+                      </div>
+                      {p.shortDescription && <p className="mt-1 text-xs text-gray-500 line-clamp-2">{p.shortDescription}</p>}
+                    </div>
+                  </Link>
+                )
+              })}
             </div>
           )}
 

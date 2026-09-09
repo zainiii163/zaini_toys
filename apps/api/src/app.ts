@@ -29,6 +29,7 @@ import notificationRoutes from './routes/notification.routes';
 import supportRoutes from './routes/support.routes';
 import adminUserRoutes from './routes/adminUser.routes';
 import blogRoutes from './routes/blog.routes';
+import newsletterRoutes from './routes/newsletter.routes';
 
 const app: Application = express();
 
@@ -103,6 +104,7 @@ app.use(`${API_PREFIX}/flash-sales`, flashSaleRoutes);
 app.use(`${API_PREFIX}/notifications`, notificationRoutes);
 app.use(`${API_PREFIX}/support`, supportRoutes);
 app.use(`${API_PREFIX}/blog`, blogRoutes);
+app.use(`${API_PREFIX}/newsletter`, newsletterRoutes);
 app.use(`${API_PREFIX}/admin/users`, adminUserRoutes);
 
 // Health check

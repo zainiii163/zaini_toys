@@ -25,6 +25,7 @@ import AuditLogPage from './pages/AuditLogPage'
 import ReportsPage from './pages/ReportsPage'
 import BlogManagerPage from './pages/BlogManagerPage'
 import NotificationsPage from './pages/NotificationsPage'
+import CustomerDetailPage from './pages/CustomerDetailPage'
 
 function AuthBootstrap({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch()
@@ -62,6 +63,7 @@ const router = createBrowserRouter([
       { path: 'orders', element: <OrdersPage /> },
       { path: 'orders/:id', element: <OrderDetailPage /> },
       { path: 'customers', element: <CustomersPage /> },
+      { path: 'customers/:id', element: <CustomerDetailPage /> },
       { path: 'categories', element: <CategoriesPage /> },
       { path: 'brands', element: <BrandsPage /> },
       { path: 'coupons', element: <CouponsPage /> },
