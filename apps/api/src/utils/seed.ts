@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
 import { User } from '../models/User';
 import { Brand } from '../models/Brand';
 import { Category } from '../models/Category';
@@ -112,12 +113,15 @@ async function seed() {
     console.log('✅ Cleared all collections\n');
 
     console.log('👤 Creating users...');
+    const salt = await bcrypt.genSalt(10);
+    const adminPass = await bcrypt.hash('Admin@123', salt);
+    const custPass = await bcrypt.hash('Customer@123', salt);
     const users = await User.insertMany([
       {
         name: 'Admin User',
         email: 'admin@toystore.pk',
         phone: '+923001234567',
-        password: 'Admin@123',
+        password: adminPass,
         role: 'admin',
         isEmailVerified: true,
         isActive: true,
@@ -128,7 +132,7 @@ async function seed() {
         name: 'Ahmed Khan',
         email: 'ahmed@example.com',
         phone: '+923211234567',
-        password: 'Customer@123',
+        password: custPass,
         role: 'customer',
         isEmailVerified: true,
         isActive: true,
@@ -152,7 +156,7 @@ async function seed() {
         name: 'Fatima Ali',
         email: 'fatima@example.com',
         phone: '+923331234567',
-        password: 'Customer@123',
+        password: custPass,
         role: 'customer',
         isEmailVerified: true,
         isActive: true,
