@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Heart, Star, Truck, ShieldCheck, Share2, Minus, Plus, ChevronRight, ZoomIn, Copy } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useGetProductBySlugQuery, useGetRelatedProductsQuery } from '../app/services/product'
 import { useGetProductReviewsQuery, useGetReviewSummaryQuery } from '../app/services/review'
@@ -102,6 +103,12 @@ export default function ProductDetailPage() {
       await navigator.clipboard.writeText(url)
       toast.success('Link copied!')
     }
+  }
+
+  const onWhatsAppShare = () => {
+    const url = window.location.href
+    const text = `Check out ${product.name} on Toy Shop! ${url}`
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
   }
 
   const lowStock = product.availableStock > 0 && product.availableStock <= 5
@@ -268,6 +275,9 @@ export default function ProductDetailPage() {
             </button>
             <button onClick={onShare} className="flex items-center gap-1 text-sm text-gray-600 hover:text-blue-600">
               <Share2 className="h-5 w-5" /> Share
+            </button>
+            <button onClick={onWhatsAppShare} className="flex items-center gap-1 text-sm text-gray-600 hover:text-green-600">
+              <MessageCircle className="h-5 w-5" /> WhatsApp
             </button>
             <Link to={`/compare`} className="flex items-center gap-1 text-sm text-gray-600 hover:text-purple-600">
               Compare

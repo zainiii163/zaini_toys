@@ -4,6 +4,8 @@ import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, Phone, Truck, 
 import { useAppSelector } from '../../hooks/typed'
 import { useGetCategoryTreeQuery } from '../../app/services/category'
 import { useGetCartQuery } from '../../app/services/cart'
+import SearchAutocomplete from '../SearchAutocomplete'
+import DarkModeToggle from '../DarkModeToggle'
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -103,23 +105,13 @@ export default function Header() {
           </div>
 
           {/* Search */}
-          <form onSubmit={onSearch} className="hidden flex-1 max-w-xl md:flex">
-            <div className="flex w-full items-center rounded-xl border border-gray-200 bg-gray-50 px-4 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-              <Search className="h-4 w-4 text-gray-400 shrink-0" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search toys, brands, categories..."
-                className="w-full bg-transparent px-3 py-2.5 text-sm outline-none"
-              />
-              <button type="submit" className="shrink-0 rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
-                Search
-              </button>
-            </div>
-          </form>
+          <div className="hidden flex-1 max-w-xl md:flex">
+            <SearchAutocomplete />
+          </div>
 
           {/* Actions */}
           <div className="flex items-center gap-0.5">
+            <DarkModeToggle />
             <Link to={auth.isAuthenticated ? '/account' : '/login'} className="flex flex-col items-center rounded-lg px-2.5 py-1.5 hover:bg-gray-100 transition-colors group">
               <User className="h-5 w-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
               <span className="text-[10px] font-medium text-gray-500 group-hover:text-blue-600 hidden sm:block">{auth.isAuthenticated ? 'Account' : 'Login'}</span>

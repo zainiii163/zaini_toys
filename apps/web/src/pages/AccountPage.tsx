@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom'
-import { User, Package, MapPin, Heart, LogOut, Badge, Trash2, Pencil } from 'lucide-react'
+import { User, Package, MapPin, Heart, LogOut, Badge, Trash2, Pencil, RefreshCw } from 'lucide-react'
+import toast from 'react-hot-toast'
 import {
   useGetProfileQuery,
   useUpdateProfileMutation,
@@ -11,6 +12,7 @@ import {
 } from '../app/services/user'
 import { useGetMyOrdersQuery } from '../app/services/order'
 import { useGetWishlistsQuery, useDeleteWishlistMutation } from '../app/services/wishlist'
+import { useAddToCartMutation } from '../app/services/cart'
 import { useAppSelector, useAppDispatch } from '../hooks/typed'
 import { logout } from '../store/authSlice'
 import { formatDate } from '../lib/utils'
@@ -153,7 +155,19 @@ export function ProfileTab() {
 
 export function OrdersTab() {
   const { data: ordersData } = useGetMyOrdersQuery()
+  const [addToCart, { isLoading: adding }] = useAddToCartMutation()
   const orders = ordersData?.data || []
+
+  const onReorder = async (order: any) => {
+    try {
+      for (const item of order.items) {
+        await addToCart({ product: item.product, quantity: item.quantity }).unwrap()
+      }
+      toast.success('Items added to cart!')
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to add items')
+    }
+  }
 
   return (
     <div className="card-toy">
@@ -193,6 +207,15 @@ export function OrdersTab() {
                   {order.status.replace('_', ' ')}
                 </span>
                 <span className="font-bold text-gray-900">Rs. {order.total.toLocaleString()}</span>
+                {(order.status === 'delivered' || order.status === 'cancelled') && (
+                  <button
+                    onClick={() => onReorder(order)}
+                    disabled={adding}
+                    className="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium hover:bg-gray-50"
+                  >
+                    <RefreshCw className="h-3 w-3" /> Reorder
+                  </button>
+                )}
                 <Link to={`/orders/track/${order.orderNumber}`} className="text-sm text-blue-600 hover:underline">
                   Track
                 </Link>
