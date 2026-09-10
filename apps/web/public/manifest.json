@@ -1,0 +1,28 @@
+{
+  "name": "Toy Shop Pakistan",
+  "short_name": "ToyShop",
+  "description": "Pakistan's #1 online toy store for kids of all ages",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "kids"],
+  "lang": "en-PK",
+  "dir": "ltr",
+  "prefer_related_applications": false
+}

@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Mail } from 'lucide-react'
+import { Mail, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../app/api'
 
 export default function NewsletterSection() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -15,6 +16,8 @@ export default function NewsletterSection() {
       await api.post('/newsletter', { email })
       toast.success('Subscribed! Check your inbox for a welcome discount.')
       setEmail('')
+      setShowConfirmation(true)
+      setTimeout(() => setShowConfirmation(false), 3000)
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Failed to subscribe'
       toast.error(msg)
@@ -41,10 +44,16 @@ export default function NewsletterSection() {
               required
             />
           </div>
-          <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? 'Subscribing...' : 'Subscribe'}
+          <button type="submit" disabled={loading} className="btn-primary !py-2">
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Subscribe'}
           </button>
         </form>
+        {showConfirmation && (
+          <div className="mx-auto mt-4 flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 text-white backdrop-blur-sm">
+            <CheckCircle className="h-5 w-5 flex-shrink-0" />
+            <span className="text-sm">✓ Welcome email sent! Check your inbox.</span>
+          </div>
+        )}
       </div>
     </section>
   )
