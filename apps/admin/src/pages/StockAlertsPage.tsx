@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Package, AlertTriangle, Send, Mail, Clock } from 'lucide-react'
+import { Package, AlertTriangle, Send } from 'lucide-react'
 import { useGetProductsQuery, useUpdateProductMutation } from '../app/services/product'
 import { useGetOrdersQuery } from '../app/services/order'
 import toast from 'react-hot-toast'
@@ -15,7 +15,6 @@ export default function StockAlertsPage() {
 
   const lowStockProducts = products.filter((p: any) => (p.availableStock || 0) > 0 && (p.availableStock || 0) <= 5)
   const outOfStockProducts = products.filter((p: any) => (p.availableStock || 0) === 0)
-  const newOrders = orders.filter((o: any) => o.status === 'pending' || o.status === 'confirmed')
 
   const onNotify = (text: string) => {
     setNotifications((prev) => [...prev, `${new Date().toLocaleString()}: ${text}`])

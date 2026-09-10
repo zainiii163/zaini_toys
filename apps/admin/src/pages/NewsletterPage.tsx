@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Mail, Send, Eye, EyeOff, Trash2, Edit3, Plus, CheckCircle } from 'lucide-react'
-import { useGetNewslettersQuery, useUpdateNewsletterStatusMutation } from '../../app/services/newsletter'
+import { Send, Eye, EyeOff, Edit3, CheckCircle } from 'lucide-react'
+import { useGetNewslettersQuery, useUpdateNewsletterStatusMutation } from '../app/services/newsletter'
 import toast from 'react-hot-toast'
 
 export default function NewsletterPage() {
@@ -28,7 +28,7 @@ export default function NewsletterPage() {
       return
     }
     try {
-      await updateStatus({ id, body: { lastEmailSent: new Date(), emailSubject: subject } }).unwrap()
+      await updateStatus({ id, body: { isSubscribed: true } }).unwrap()
       toast.success('Email sent!')
       setSubject('')
       setBody('')

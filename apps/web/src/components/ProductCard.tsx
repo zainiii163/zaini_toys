@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { ShoppingCart, Star, Eye, ArrowLeftRight, Share2, MessageCircle, Link as LinkIcon } from 'lucide-react'
+import { ShoppingCart, Star, Eye, ArrowLeftRight, Share2, MessageCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { Product } from '../lib/types'
 import { useAddToCartMutation } from '../app/services/cart'

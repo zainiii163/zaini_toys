@@ -1,15 +1,10 @@
 import { useState } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
-import { Mail, CheckCircle, AlertCircle, Clock } from 'lucide-react'
+import { Link, useParams } from 'react-router-dom'
 import { useGetOrderByNumberQuery, useUpdateOrderStatusMutation } from '../app/services/order'
-import { useGetMyOrdersQuery } from '../app/services/order'
 import toast from 'react-hot-toast'
-import OrderCancelButton from '../components/OrderCancelButton'
-import InvoiceDownload from '../components/InvoiceDownload'
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
   const { data, isLoading } = useGetOrderByNumberQuery(id || '', { skip: !id })
   const [updateStatus] = useUpdateOrderStatusMutation()
   const [notes, setNotes] = useState('')
@@ -39,7 +34,6 @@ export default function OrderDetailPage() {
           <p className="text-sm text-gray-500">Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
         </div>
         <div className="flex items-center gap-2">
-          <InvoiceDownload order={order} />
           <Link to="/orders" className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50">Back</Link>
         </div>
       </div>
@@ -133,7 +127,6 @@ export default function OrderDetailPage() {
           <div className="stat-card">
             <h2 className="mb-3 font-semibold">Shipping</h2>
             <div className="space-y-2 text-sm">
-              <p><span className="text-gray-500">Method:</span> {(order.shippingMethod || 'standard').replace('_', ' ')}</p>
               <p><span className="text-gray-500">Cost:</span> Rs. {(order.shippingCost || 0)?.toLocaleString()}</p>
               {order.shippingAddress && (
                 <div>
@@ -147,10 +140,8 @@ export default function OrderDetailPage() {
 
           {/* Actions */}
           <div className="space-y-2">
-            <OrderCancelButton order={order} />
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <Clock className="h-3 w-3" />
-              <span>Last updated: {new Date(order.updatedAt).toLocaleString()}</span>
+            <div className="text-xs text-gray-500">
+              Last updated: {new Date(order.createdAt).toLocaleString()}
             </div>
           </div>
         </div>

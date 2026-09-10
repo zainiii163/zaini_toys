@@ -16,15 +16,21 @@ export default function SalesByCategoryChart() {
   const categorySales = useMemo(() => {
     const orders = ordersData?.data || []
     const products = productsData?.data || []
-    const productMap = new Map(products.map((p: any) => [p._id, p]))
+
+    // Create a map of product name -> category for matching
+    const productCategoryMap = new Map<string, string>()
+    for (const p of products) {
+      if (p.name && p.category?.name) {
+        productCategoryMap.set(p.name.toLowerCase(), p.category.name)
+      }
+    }
 
     const sales: Record<string, number> = {}
 
     for (const order of orders) {
       if (order.status === 'cancelled') continue
       for (const item of order.items || []) {
-        const product = productMap.get(item.product)
-        const category = product?.category?.name || 'Uncategorized'
+        const category = productCategoryMap.get(item.productName?.toLowerCase() || '') || 'Uncategorized'
         sales[category] = (sales[category] || 0) + (item.total || item.price * item.quantity || 0)
       }
     }

@@ -1,13 +1,14 @@
 import { useState, useRef } from 'react'
 import { Upload, FileText, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { api } from '../app/api'
+import { useCreateProductMutation } from '../app/services/product'
 
 export default function CsvImport() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [importing, setImporting] = useState(false)
   const [result, setResult] = useState<{ success: number; errors: string[] } | null>(null)
+  const [createProduct] = useCreateProductMutation()
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
@@ -73,11 +74,11 @@ export default function CsvImport() {
         }
 
         try {
-          const res = await api.post('/products', body)
-          if (res.data?.success) success++
-          else errors.push(`Row ${i + 2}: ${res.data?.error || 'Unknown error'}`)
+          const res = await createProduct(body).unwrap()
+          if (res.success) success++
+          else errors.push(`Row ${i + 2}: ${res.error || 'Unknown error'}`)
         } catch (err: any) {
-          errors.push(`Row ${i + 2}: ${err?.response?.data?.error || 'API error'}`)
+          errors.push(`Row ${i + 2}: ${err?.data?.error || 'API error'}`)
         }
       }
 

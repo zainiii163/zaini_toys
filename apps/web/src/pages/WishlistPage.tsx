@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Heart, ShoppingCart, Trash2, Plus } from 'lucide-react'
+import { Heart, ShoppingCart, Trash2, Plus, LayoutGrid, List } from 'lucide-react'
 import toast from 'react-hot-toast'
 import {
   useGetWishlistsQuery,
@@ -10,7 +10,9 @@ import {
   useMoveAllToCartMutation,
 } from '../app/services/wishlist'
 import { useAddToCartMutation } from '../app/services/cart'
+import { useGetCategoryTreeQuery } from '../app/services/category'
 import { formatPrice } from '../lib/utils'
+import ProductCard from '../components/ProductCard'
 
 export default function WishlistPage() {
   const { data: wishlistsData } = useGetWishlistsQuery()
@@ -18,10 +20,12 @@ export default function WishlistPage() {
   const [removeWishlistItem] = useRemoveWishlistItemMutation()
   const [deleteWishlist] = useDeleteWishlistMutation()
   const [moveAllToCart] = useMoveAllToCartMutation()
-  const [addToCart] = useAddToCartMutation()
+   const [addToCart] = useAddToCartMutation()
+   const { data: categoriesData } = useGetCategoryTreeQuery()
 
-  const [newName, setNewName] = useState('')
-  const [showCreate, setShowCreate] = useState(false)
+   const [newName, setNewName] = useState('')
+   const [showCreate, setShowCreate] = useState(false)
+   const [categoryFilter, setCategoryFilter] = useState('all')
 
   const wishlists = wishlistsData?.data || []
 
@@ -107,6 +111,18 @@ export default function WishlistPage() {
         </div>
       ) : (
         <div className="space-y-6">
+          {/* Category Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">Filter:</span>
+            {['all', ...(categoriesData?.data || []).map((c: any) => c.slug)].map((cat) => (
+              <button key={cat} onClick={() => setCategoryFilter(cat)} className={`rounded-lg px-3 py-1 text-xs font-medium ${
+                categoryFilter === cat ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}>
+                {cat === 'all' ? 'All' : cat.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+
           {wishlists.map((wl) => (
             <div key={wl._id} className="card-toy overflow-hidden">
               <div className="flex flex-col gap-3 border-b border-gray-100 p-5 sm:flex-row sm:items-center sm:justify-between bg-gray-50">

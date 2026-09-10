@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Mail, MessageSquare, Clock, CheckCircle, AlertCircle, Send } from 'lucide-react'
+import { Mail, Send } from 'lucide-react'
 import { useGetOrdersQuery } from '../app/services/order'
 import toast from 'react-hot-toast'
 

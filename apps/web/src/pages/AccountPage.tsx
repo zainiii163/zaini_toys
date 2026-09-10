@@ -157,7 +157,9 @@ export function ProfileTab() {
 export function OrdersTab() {
   const { data: ordersData } = useGetMyOrdersQuery()
   const [addToCart, { isLoading: adding }] = useAddToCartMutation()
+  const [statusFilter, setStatusFilter] = useState('all')
   const orders = ordersData?.data || []
+  const filteredOrders = statusFilter === 'all' ? orders : orders.filter((o: any) => o.status === statusFilter)
 
   const onReorder = async (order: any) => {
     try {
@@ -173,10 +175,20 @@ export function OrdersTab() {
   return (
     <div className="card-toy">
       <div className="border-b border-gray-200 p-6">
-        <h2 className="font-semibold">My Orders</h2>
-      </div>
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold">My Orders ({filteredOrders.length})</h2>
+          <div className="flex gap-1">
+            {['all', 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled'].map((status) => (
+              <button key={status} onClick={() => setStatusFilter(status)} className={`rounded-lg px-2 py-1 text-xs font-medium ${
+                statusFilter === status ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}>
+                {status === 'all' ? 'All' : status.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+        </div>
       <div className="divide-y divide-gray-100">
-        {orders.length === 0 ? (
+        {filteredOrders.length === 0 ? (
           <div className="p-12 text-center text-gray-500">
             No orders yet.{' '}
             <Link to="/shop" className="text-blue-600">
@@ -184,7 +196,7 @@ export function OrdersTab() {
             </Link>
           </div>
         ) : (
-          orders.map((order) => (
+          {filteredOrders.map((order) => (
             <div key={order._id} className="flex flex-col gap-2 p-6 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-4">
                 <img src={order.items[0]?.productImage} alt="" className="h-16 w-16 rounded-lg object-cover" />

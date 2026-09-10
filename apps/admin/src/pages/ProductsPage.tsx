@@ -47,7 +47,9 @@ export default function ProductsPage() {
 
   const handleBulkToggleActive = async (active: boolean) => {
     for (const id of selectedIds) {
-      await updateProduct({ id, body: { isActive: active } })
+      const fd = new FormData()
+      fd.append('isActive', String(active))
+      await updateProduct({ id, body: fd })
     }
     toast.success(`${selectedIds.length} products ${active ? 'activated' : 'deactivated'}`)
     setSelectedIds([])

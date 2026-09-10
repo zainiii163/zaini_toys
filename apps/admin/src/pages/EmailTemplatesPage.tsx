@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Save, Send, Mail, Eye, EyeOff, Edit3, Plus } from 'lucide-react'
+import { Save, Send, Mail, Edit3, Plus } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const EMAIL_TEMPLATES = [

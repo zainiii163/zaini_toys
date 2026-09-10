@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Bell, Check, CheckCheck, Trash2 } from 'lucide-react'
-import { api } from '../app/api'
 import toast from 'react-hot-toast'
+
+const API = '/api/v1'
 
 interface Notification {
   _id: string
@@ -20,8 +21,8 @@ export default function NotificationsPage() {
   const fetchNotifications = async () => {
     setLoading(true)
     try {
-      const res = await api.get('/notifications')
-      setNotifications(res.data.data || [])
+      const res = await fetch(`${API}/notifications`).then((r) => r.json())
+      setNotifications(res.data || [])
     } catch {}
     setLoading(false)
   }
@@ -30,14 +31,14 @@ export default function NotificationsPage() {
 
   const markRead = async (id: string) => {
     try {
-      await api.put(`/notifications/${id}/read`)
+      await fetch(`${API}/notifications/${id}/read`, { method: 'PUT' })
       setNotifications((prev) => prev.map((n) => n._id === id ? { ...n, isRead: true } : n))
     } catch { toast.error('Failed') }
   }
 
   const markAllRead = async () => {
     try {
-      await api.put('/notifications/read-all')
+      await fetch(`${API}/notifications/read-all`, { method: 'PUT' })
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
       toast.success('All marked as read')
     } catch { toast.error('Failed') }
@@ -45,7 +46,7 @@ export default function NotificationsPage() {
 
   const deleteNotification = async (id: string) => {
     try {
-      await api.delete(`/notifications/${id}`)
+      await fetch(`${API}/notifications/${id}`, { method: 'DELETE' })
       setNotifications((prev) => prev.filter((n) => n._id !== id))
     } catch { toast.error('Failed') }
   }

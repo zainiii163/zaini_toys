@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Search, Package, ArrowDown, ArrowUp, RotateCcw, AlertTriangle, Truck } from 'lucide-react'
-import { api } from '../app/api'
+
+const API = '/api/v1'
 
 interface InventoryLog {
   _id: string
@@ -36,8 +37,9 @@ export default function InventoryLogPage() {
       const params: Record<string, string> = { limit: '50' }
       if (search) params.search = search
       if (typeFilter) params.type = typeFilter
-      const res = await api.get('/inventory/logs', { params })
-      setLogs(res.data.data || [])
+      const qs = new URLSearchParams(params).toString()
+      const res = await fetch(`${API}/inventory/logs?${qs}`).then((r) => r.json())
+      setLogs(res.data || [])
     } catch {}
     setLoading(false)
   }

@@ -20,14 +20,13 @@ export default function BulkEditPanel({ selectedIds, onComplete }: Props) {
     let success = 0
     let errors = 0
 
-    const body: Record<string, any> = {}
-    if (price) body.price = Number(price)
-    if (salePrice) body.salePrice = Number(salePrice) || undefined
-    if (stock) body.availableStock = Number(stock)
-
     for (const id of selectedIds) {
       try {
-        await updateProduct({ id, body }).unwrap()
+        const fd = new FormData()
+        if (price) fd.append('price', String(price))
+        if (salePrice) fd.append('salePrice', String(salePrice))
+        if (stock) fd.append('availableStock', String(stock))
+        await updateProduct({ id, body: fd }).unwrap()
         success++
       } catch {
         errors++

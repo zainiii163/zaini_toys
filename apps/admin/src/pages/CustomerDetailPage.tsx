@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Mail, Phone, MapPin, Calendar, Package, Star, ShoppingBag } from 'lucide-react'
-import { api } from '../app/api'
+
+const API = '/api/v1'
 
 interface Customer {
   _id: string
@@ -35,11 +36,11 @@ export default function CustomerDetailPage() {
     const fetchData = async () => {
       try {
         const [custRes, ordersRes] = await Promise.all([
-          api.get(`/admin/users/${id}`),
-          api.get(`/orders?user=${id}&limit=50`),
+          fetch(`${API}/admin/users/${id}`).then((r) => r.json()),
+          fetch(`${API}/orders?user=${id}&limit=50`).then((r) => r.json()),
         ])
-        setCustomer(custRes.data.data)
-        setOrders(ordersRes.data.data || [])
+        setCustomer(custRes.data)
+        setOrders(ordersRes.data || [])
       } catch {}
       setLoading(false)
     }

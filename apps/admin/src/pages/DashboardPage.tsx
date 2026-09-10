@@ -1,10 +1,11 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useGetOrdersQuery } from '../app/services/order'
 import { useGetUsersQuery } from '../app/services/user'
 import { useGetProductsQuery } from '../app/services/product'
 import { useGetCategoriesQuery } from '../app/services/category'
 import { useGetCouponsQuery } from '../app/services/coupon'
-import { DollarSign, ShoppingCart, Package, Users, AlertTriangle, Clock, TrendingUp, Star, Eye, BarChart3, ArrowUpRight, ArrowDownRight, RotateCcw } from 'lucide-react'
+import { DollarSign, ShoppingCart, Package, Users, AlertTriangle, Clock, TrendingUp, ArrowUpRight, ArrowDownRight, RotateCcw } from 'lucide-react'
 import SalesByCategoryChart from '../components/SalesByCategoryChart'
 import SalesTrendChart from '../components/SalesTrendChart'
 import TopCustomersChart from '../components/TopCustomersChart'
@@ -30,6 +31,9 @@ export default function DashboardPage() {
     const today = new Date().toDateString()
     return new Date(o.createdAt).toDateString() === today
   })
+
+  const [statusFilter, setStatusFilter] = useState('all')
+  const filteredOrders = statusFilter === 'all' ? orders : orders.filter((o: any) => o.status === statusFilter)
 
   const stats = [
     {
@@ -132,13 +136,22 @@ export default function DashboardPage() {
       <RevenueChartWithDateRange />
       <SalesTrendChart />
 
-      {/* Recent Orders + Sidebar */}
+      {/* Order Filter + Recent Orders + Sidebar */}
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         {/* Recent Orders */}
         <div className="stat-card lg:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
             <h2 className="font-semibold">Recent Orders</h2>
             <Link to="/orders" className="text-sm text-blue-600 hover:underline">View all</Link>
+          </div>
+          <div className="mb-3 flex items-center gap-2">
+            {['all', 'pending', 'confirmed', 'processing', 'shipped', 'delivered'].map((status) => (
+              <button key={status} className={`rounded-lg px-2 py-1 text-xs font-medium ${
+                statusFilter === status ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`} onClick={() => setStatusFilter(status)}>
+                {status === 'all' ? 'All' : status.replace('_', ' ')}
+              </button>
+            ))}
           </div>
           {ordersLoading ? (
             <div className="space-y-3">
@@ -157,7 +170,7 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {orders.slice(0, 8).map((order: any) => (
+                  {filteredOrders.slice(0, 8).map((order: any) => (
                     <tr key={order._id} className="hover:bg-gray-50">
                       <td className="py-2.5 font-medium">#{order.orderNumber}</td>
                       <td className="py-2.5 text-gray-600">{order.customerInfo?.name || 'Guest'}</td>

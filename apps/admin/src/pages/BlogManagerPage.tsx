@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Edit2, Trash2, Eye, EyeOff, Calendar } from 'lucide-react'
+import { Plus, Edit2, Trash2, Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { api } from '../app/api'
+
+const API = '/api/v1'
 
 interface BlogPost {
   _id: string
@@ -31,13 +32,14 @@ export default function BlogManagerPage() {
   const fetchPosts = async () => {
     setLoading(true)
     try {
-      const res = await api.get('/blog/admin/all')
-      setPosts(res.data.data || [])
+      const res = await fetch(`${API}/blog/admin/all`)
+      const data = await res.json()
+      setPosts(data.data || [])
     } catch {}
     setLoading(false)
   }
 
-  useState(() => { fetchPosts() })
+  useEffect(() => { fetchPosts() }, [])
 
   const resetForm = () => {
     setTitle(''); setContent(''); setExcerpt(''); setCategory('Guides'); setIsPublished(false); setEditingId(null); setShowForm(false)
@@ -48,16 +50,16 @@ export default function BlogManagerPage() {
     if (!title.trim() || !content.trim()) { toast.error('Title and content required'); return }
     try {
       if (editingId) {
-        await api.put(`/blog/${editingId}`, { title, content, excerpt, category, isPublished })
+        await fetch(`${API}/blog/${editingId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, excerpt, category, isPublished }) })
         toast.success('Post updated')
       } else {
-        await api.post('/blog', { title, content, excerpt, category, isPublished })
+        await fetch(`${API}/blog`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, excerpt, category, isPublished }) })
         toast.success('Post created')
       }
       resetForm()
       fetchPosts()
     } catch (err: any) {
-      toast.error(err?.response?.data?.error || 'Failed')
+      toast.error(err?.message || 'Failed')
     }
   }
 
@@ -67,11 +69,11 @@ export default function BlogManagerPage() {
 
   const onDelete = async (id: string) => {
     if (!confirm('Delete this post?')) return
-    try { await api.delete(`/blog/${id}`); toast.success('Deleted'); fetchPosts() } catch { toast.error('Failed') }
+    try { await fetch(`${API}/blog/${id}`, { method: 'DELETE' }); toast.success('Deleted'); fetchPosts() } catch { toast.error('Failed') }
   }
 
   const togglePublish = async (post: BlogPost) => {
-    try { await api.put(`/blog/${post._id}`, { isPublished: !post.isPublished }); toast.success(post.isPublished ? 'Unpublished' : 'Published'); fetchPosts() } catch { toast.error('Failed') }
+    try { await fetch(`${API}/blog/${post._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isPublished: !post.isPublished }) }); toast.success(post.isPublished ? 'Unpublished' : 'Published'); fetchPosts() } catch { toast.error('Failed') }
   }
 
   return (

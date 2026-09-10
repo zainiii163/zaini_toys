@@ -1,6 +1,4 @@
-import { useState } from 'react'
 import { Plus, Trash2, GripVertical } from 'lucide-react'
-import toast from 'react-hot-toast'
 
 interface Variant {
   id: string
@@ -58,7 +56,7 @@ export default function VariantManager({ variants, onChange }: Props) {
       )}
 
       <div className="space-y-2">
-        {variants.map((variant, i) => (
+        {variants.map((variant) => (
           <div key={variant.id} className="flex items-center gap-2 rounded-lg border border-gray-200 p-3">
             <GripVertical className="h-4 w-4 flex-shrink-0 text-gray-400 cursor-grab" />
             <input

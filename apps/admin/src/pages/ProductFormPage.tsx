@@ -23,7 +23,7 @@ export default function ProductFormPage() {
   })
   const [images, setImages] = useState<FileList | null>(null)
   const [error, setError] = useState('')
-  const [variants, setVariants] = useState<{ name: string; value: string; sku: string; stock: number }[]>([])
+  const [variants, setVariants] = useState<Array<{ id: string; name: string; value: string; sku?: string; price?: number; stock?: number; isActive: boolean }>>([])
 
   useEffect(() => {
     if (existing?.data) {

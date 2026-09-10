@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useGetMeQuery, useUpdateProfileMutation, useChangePasswordMutation } from '../app/services/auth'
 import toast from 'react-hot-toast'
-import { Store, Truck, CreditCard, Bell, Save } from 'lucide-react'
+import { Store, Truck, CreditCard, Save } from 'lucide-react'
 
 export default function SettingsPage() {
   const { data, isLoading } = useGetMeQuery()

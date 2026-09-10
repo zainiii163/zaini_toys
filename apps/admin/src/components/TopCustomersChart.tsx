@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
 import { useGetOrdersQuery } from '../app/services/order'
 
 export default function TopCustomersChart() {
@@ -11,11 +10,11 @@ export default function TopCustomersChart() {
 
     for (const order of orders) {
       if (order.status === 'cancelled') continue
-      const key = order.customer || order.customerInfo?.email || 'unknown'
+      const key = order.customerInfo?.email || 'unknown'
       if (!customers[key]) {
         customers[key] = {
           name: order.customerInfo?.name || 'Customer',
-          email: order.customerInfo?.email || '',
+          email: key,
           total: 0,
           orders: 0,
         }

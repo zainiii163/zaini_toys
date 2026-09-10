@@ -11,18 +11,20 @@ const SPEND_TIERS = [
 
 export default function CustomerSegmentation() {
   const { data: ordersData } = useGetOrdersQuery({ limit: '1000', sort: '-createdAt' })
-  const { data: usersData } = useGetUsersQuery2({ limit: '100' })
+  const { data: usersData } = useGetUsersQuery({ limit: '100' })
 
   const segments = useMemo(() => {
     const orders = ordersData?.data || []
     const users = usersData?.data || []
     const totalOrders = orders.length
 
-    const userSpending = new Map<string, number>()
+    const userSpending = new Map<string, { name: string; email: string; total: number }>()
     for (const order of orders) {
       if (order.status === 'cancelled') continue
-      const key = order.customer || order.customerInfo?.email || 'unknown'
-      userSpending.set(key, (userSpending.get(key) || 0) + (order.total || 0))
+      const key = order.customerInfo?.email || 'unknown'
+      const existing = userSpending.get(key) || { name: order.customerInfo?.name || '', email: key, total: 0 }
+      existing.total += order.total || 0
+      userSpending.set(key, existing)
     }
 
     const stats = {
@@ -35,11 +37,11 @@ export default function CustomerSegmentation() {
       totalOrders,
     }
 
-    userSpending.forEach((spend) => {
-      stats.totalRevenue += spend
-      if (spend >= 50000) stats.vip++
-      else if (spend >= 10000) stats.regular++
-      else if (spend >= 1000) stats.new++
+    userSpending.forEach(({ total }) => {
+      stats.totalRevenue += total
+      if (total >= 50000) stats.vip++
+      else if (total >= 10000) stats.regular++
+      else if (total >= 1000) stats.new++
       else stats.onetime++
     })
 
