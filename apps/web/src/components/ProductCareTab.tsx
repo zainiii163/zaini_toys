@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Wrench, Shield, AlertTriangle, BookOpen } from 'lucide-react'
+import { Wrench, Shield, AlertTriangle, BookOpen } from 'lucide-react'
 import type { Product } from '../lib/types'
 
 interface Props {

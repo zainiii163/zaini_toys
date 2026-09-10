@@ -4,7 +4,6 @@ import { ShoppingCart, Heart, Star, Truck, ShieldCheck, Share2, Minus, Plus, Zoo
 import { MessageCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useGetProductBySlugQuery, useGetRelatedProductsQuery } from '../app/services/product'
-import { useGetProductReviewsQuery, useGetReviewSummaryQuery } from '../app/services/review'
 import { useAddToCartMutation } from '../app/services/cart'
 import { useAddToWishlistMutation, useCreateWishlistMutation, useGetWishlistsQuery } from '../app/services/wishlist'
 import { useAppSelector } from '../hooks/typed'
@@ -16,14 +15,12 @@ import Breadcrumb from '../components/Breadcrumb'
 import AgeVerificationModal from '../components/AgeVerificationModal'
 import ProductCareTab from '../components/ProductCareTab'
 import ProductBundles from '../components/ProductBundles'
-import Breadcrumb from '../components/Breadcrumb'
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const [qty, setQty] = useState(1)
   const [galleryIdx, setGalleryIdx] = useState(0)
-  const [activeTab, setActiveTab] = useState<'details' | 'reviews' | 'shipping'>('details')
   const [zoomPos, setZoomPos] = useState<{ x: number; y: number } | null>(null)
   const [showAgeVerify, setShowAgeVerify] = useState(false)
   const [addToCart, { isLoading: adding }] = useAddToCartMutation()
@@ -35,8 +32,6 @@ export default function ProductDetailPage() {
 
   const { data: productData, isLoading: productLoading } = useGetProductBySlugQuery(slug || '', { skip: !slug })
   const { data: relatedData } = useGetRelatedProductsQuery(productData?.data?._id || '')
-  const { data: reviewsData } = useGetProductReviewsQuery({ productId: productData?.data?._id || '', page: 1 })
-  const { data: summaryData } = useGetReviewSummaryQuery(productData?.data?._id || '')
 
   if (productLoading) {
     return (
@@ -65,17 +60,18 @@ export default function ProductDetailPage() {
     return <div className="container-toy py-12 text-center">Product not found</div>
   }
 
-  const product = productData.data
+const product = productData.data
 
-  if (product.ageRestriction && product.ageRestriction > 0) {
-    if (!auth.isAuthenticated) {
-      navigate('/login', { state: { from: `/product/${slug}` } })
-      return null
-    }
-    if (auth.user && auth.user.age < product.ageRestriction) {
-      return <AgeVerificationModal open={showAgeVerify} onAccept={() => setShowAgeVerify(false)} onDecline={() => navigate('/')} />
-    }
+const ageRestriction = (product as any).ageRestriction || 0
+if (ageRestriction > 0) {
+  if (!auth.isAuthenticated) {
+    navigate('/login', { state: { from: `/product/${slug}` } })
+    return null
   }
+  if ((auth.user as any)?.age && (auth.user as any).age < ageRestriction) {
+    setShowAgeVerify(true)
+  }
+}
 
   const images = product.images || []
   const videos = (product as any).videos || []
@@ -374,6 +370,12 @@ export default function ProductDetailPage() {
           </div>
         </section>
       )}
+
+      <AgeVerificationModal
+        open={showAgeVerify}
+        onAccept={() => setShowAgeVerify(false)}
+        onDecline={() => navigate('/')}
+      />
     </div>
   )
 }

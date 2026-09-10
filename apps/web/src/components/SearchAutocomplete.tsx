@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { Search, Clock, TrendingUp, X } from 'lucide-react'
+import { Search, Clock, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { api } from '../app/api'
 
 const POPULAR_SEARCHES = ['Lego', 'Remote control car', 'Dolls', 'STEM kit', 'Board games', 'Outdoor toys']
 
@@ -25,8 +24,8 @@ export default function SearchAutocomplete() {
     if (query.length < 2) { setSuggestions([]); return }
     const timer = setTimeout(async () => {
       try {
-        const res = await api.get(`/search/suggestions?q=${encodeURIComponent(query)}`)
-        setSuggestions(res.data.data || [])
+        const res = await fetch(`/api/v1/search/suggestions?q=${encodeURIComponent(query)}`).then((r) => r.json())
+        setSuggestions(res.data || [])
       } catch { setSuggestions([]) }
     }, 300)
     return () => clearTimeout(timer)

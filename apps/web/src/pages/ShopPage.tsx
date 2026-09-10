@@ -4,7 +4,7 @@ import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, Star, LayoutGrid,
 import { useGetProductsQuery } from '../app/services/product'
 import { useGetCategoryTreeQuery } from '../app/services/category'
 import { useGetBrandsQuery } from '../app/services/brand'
-import { useAppSelector } from '../hooks/typed'
+import toast from 'react-hot-toast'
 import ProductCard from '../components/ProductCard'
 import SkeletonCard from '../components/SkeletonCard'
 import SEO from '../components/SEO'
@@ -102,7 +102,10 @@ export default function ShopPage() {
   const toggleCompare = (id: string) => {
     setCompareIds((prev) => {
       if (prev.includes(id)) return prev.filter((x) => x !== id)
-      if (prev.length >= 4) { toast.error('Maximum 4 products to compare') return prev }
+      if (prev.length >= 4) {
+        toast.error('Maximum 4 products to compare')
+        return prev
+      }
       return [...prev, id]
     })
   }
@@ -390,7 +393,7 @@ export default function ShopPage() {
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {products.map((p) => <ProductCard key={p._id} product={p} compareIds={compareIds} onCompare={toggleCompare} />)}
+              {products.map((p) => <ProductCard key={p._id} product={p} compareIds={compareIds} onCompare={(prod) => toggleCompare(prod._id)} />)}
             </div>
           ) : (
             <div className="space-y-3">

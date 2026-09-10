@@ -1,7 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
 import { Calendar, User, Tag, ArrowLeft, Share2 } from 'lucide-react'
 import { useGetPostBySlugQuery } from '../app/services/blog'
-import SkeletonCard from '../components/SkeletonCard'
 
 export default function BlogPostPage() {
   const { slug } = useParams<{ slug: string }>()

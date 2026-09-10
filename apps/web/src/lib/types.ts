@@ -25,6 +25,9 @@ export interface Product {
   material?: string[]
   educationalBenefits?: string[]
   safetyWarnings?: string[]
+  careInstructions?: string[]
+  dimensions?: { length: number; width: number; height: number }
+  weight?: string
   isFeatured: boolean
   isNewArrival: boolean
   isBestSeller: boolean

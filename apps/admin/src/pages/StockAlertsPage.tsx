@@ -1,17 +1,14 @@
 import { useState } from 'react'
-import { Package, AlertTriangle, Send } from 'lucide-react'
+import { Package, AlertTriangle, Send, Clock } from 'lucide-react'
 import { useGetProductsQuery, useUpdateProductMutation } from '../app/services/product'
-import { useGetOrdersQuery } from '../app/services/order'
 import toast from 'react-hot-toast'
 
 export default function StockAlertsPage() {
   const { data: productsData } = useGetProductsQuery({ limit: '200' })
-  const { data: ordersData } = useGetOrdersQuery({ limit: '50', sort: '-createdAt' })
   const [updateProduct] = useUpdateProductMutation()
   const [notifications, setNotifications] = useState<string[]>([])
 
   const products = productsData?.data || []
-  const orders = ordersData?.data || []
 
   const lowStockProducts = products.filter((p: any) => (p.availableStock || 0) > 0 && (p.availableStock || 0) <= 5)
   const outOfStockProducts = products.filter((p: any) => (p.availableStock || 0) === 0)
@@ -23,7 +20,9 @@ export default function StockAlertsPage() {
 
   const onRestock = async (productId: string) => {
     try {
-      await updateProduct({ id: productId, body: { availableStock: 50 } }).unwrap()
+      const fd = new FormData()
+      fd.append('availableStock', '50')
+      await updateProduct({ id: productId, body: fd }).unwrap()
       toast.success('Stock updated to 50')
     } catch {
       toast.error('Failed to restock')

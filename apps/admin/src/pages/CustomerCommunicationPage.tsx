@@ -14,7 +14,6 @@ export default function CustomerCommunicationPage() {
 
   const onSend = () => {
     if (!message.trim() || !selectedOrder) return
-    const order = orders.find((o) => o._id === selectedOrder)
     const newMsg = {
       from: 'admin',
       text: message,

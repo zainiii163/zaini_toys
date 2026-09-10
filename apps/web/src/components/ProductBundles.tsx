@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
 import { Package, TrendingDown, ArrowRight } from 'lucide-react'
 import { useGetProductsQuery } from '../app/services/product'
 import type { Product } from '../lib/types'
@@ -9,7 +8,7 @@ interface Props {
 }
 
 export default function ProductBundles({ currentProduct }: Props) {
-  const { data: productsData } = useGetProductsQuery({ limit: '50' })
+  const { data: productsData } = useGetProductsQuery({ limit: 50 })
   const [selected, setSelected] = useState<string[]>([currentProduct._id])
 
   const products = (productsData?.data || []).filter(

@@ -103,7 +103,7 @@ export default function TicketDetailPage() {
 
           {/* Thread messages */}
           {ticket.messages?.map((msg, i) => {
-            const isUser = typeof msg.sender === 'object' ? msg.sender._id === auth.user?._id : msg.sender === auth.user?._id
+            const isUser = typeof msg.sender === 'object' ? (msg.sender as any)._id === auth.user?._id : msg.sender === auth.user?._id
             const senderName = isUser ? (auth.user?.name || 'You') : (typeof msg.sender === 'object' ? msg.sender.name : 'Support')
             return (
               <div key={i} className={`card-toy p-4 ${!isUser ? 'border-l-4 border-blue-500' : ''}`}>

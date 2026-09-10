@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { X, Shield, AlertTriangle } from 'lucide-react'
+import { useState } from 'react'
+import { Shield, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 interface Props {
@@ -10,7 +10,6 @@ interface Props {
 
 export default function AgeVerificationModal({ open, onAccept, onDecline }: Props) {
   const [age, setAge] = useState('')
-  const [verified, setVerified] = useState(false)
 
   if (!open) return null
 
@@ -20,8 +19,7 @@ export default function AgeVerificationModal({ open, onAccept, onDecline }: Prop
       toast.error('You must be at least 18 years old to view this product')
       return
     }
-    setVerified(true)
-    setTimeout(() => onAccept(), 500)
+    onAccept()
   }
 
   return (

@@ -15,9 +15,9 @@ import RevenueChartWithDateRange from '../components/RevenueChartWithDateRange'
 export default function DashboardPage() {
   const { data: ordersData, isLoading: ordersLoading } = useGetOrdersQuery({ limit: '10', sort: '-createdAt' })
   const { data: usersData } = useGetUsersQuery({ limit: '1' })
-  const { data: productsData, isLoading: productsLoading } = useGetProductsQuery({ limit: '50' })
+  const { data: productsData } = useGetProductsQuery({ limit: '50' })
   const { data: categoriesData } = useGetCategoriesQuery()
-  const { data: couponsData } = useGetCouponsQuery()
+  const { data: couponsData } = useGetCouponsQuery({})
 
   const orders = ordersData?.data || []
   const products = productsData?.data || []

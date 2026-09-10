@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Gift, CreditCard, Send, Check, Copy } from 'lucide-react'
+import { Gift, CreditCard, Check, Copy } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const DENOMINATIONS = [500, 1000, 1500, 2000, 3000, 5000]

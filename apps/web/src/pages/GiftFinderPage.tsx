@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Gift, Sparkles, ArrowRight, Heart, Baby, Blocks, Puzzle, Rocket, Gamepad2, Star } from 'lucide-react'
+import { Sparkles, ArrowRight, Baby, Blocks, Puzzle, Rocket, Gamepad2, Star } from 'lucide-react'
 
 const AGE_GROUPS = [
   { label: '0–12 Months', value: '0-1', icon: Baby, color: 'bg-pink-50 border-pink-200 text-pink-700' },

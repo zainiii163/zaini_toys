@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { X, ShoppingCart, Heart, Star, Minus, Plus } from 'lucide-react'
+import { X, ShoppingCart, Star, Minus, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAppSelector } from '../hooks/typed'

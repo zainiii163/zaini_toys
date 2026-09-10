@@ -242,7 +242,7 @@ export default function HomePage() {
                   className="card-toy flex flex-col items-center p-4 text-center transition-shadow hover:shadow-md"
                 >
                   {brand.logo ? (
-                    <img src={brand.logo} alt={brand.name} className="h-12 w-12 rounded-full object-contain" />
+                    <img src={brand.logo.url} alt={brand.name} className="h-12 w-12 rounded-full object-contain" />
                   ) : (
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-lg font-bold text-gray-400">
                       {brand.name[0]}

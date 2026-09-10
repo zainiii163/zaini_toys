@@ -4,7 +4,7 @@ import { useGetNewslettersQuery, useUpdateNewsletterStatusMutation } from '../ap
 import toast from 'react-hot-toast'
 
 export default function NewsletterPage() {
-  const { data, isLoading } = useGetNewslettersQuery({ limit: '50' })
+  const { data, isLoading } = useGetNewslettersQuery({ limit: 50 })
   const [updateStatus] = useUpdateNewsletterStatusMutation()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [subject, setSubject] = useState('')

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Heart, ShoppingCart, Trash2, Plus, LayoutGrid, List } from 'lucide-react'
+import { Heart, ShoppingCart, Trash2, Plus } from 'lucide-react'
 import toast from 'react-hot-toast'
 import {
   useGetWishlistsQuery,
@@ -12,7 +12,6 @@ import {
 import { useAddToCartMutation } from '../app/services/cart'
 import { useGetCategoryTreeQuery } from '../app/services/category'
 import { formatPrice } from '../lib/utils'
-import ProductCard from '../components/ProductCard'
 
 export default function WishlistPage() {
   const { data: wishlistsData } = useGetWishlistsQuery()

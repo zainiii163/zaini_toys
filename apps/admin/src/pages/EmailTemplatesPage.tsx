@@ -30,7 +30,7 @@ export default function EmailTemplatesPage() {
     setEditingId(null)
   }
 
-  const onTest = (t: typeof EMAIL_TEMPLATES[0]) => {
+  const onTest = () => {
     toast.success(`Test email sent to admin@example.com`)
   }
 
@@ -58,7 +58,7 @@ export default function EmailTemplatesPage() {
                 <button onClick={() => onEdit(t)} className="rounded-lg bg-gray-100 px-3 py-1.5 text-xs hover:bg-gray-200">
                   <Edit3 className="mr-1 h-3 w-3" /> Edit
                 </button>
-                <button onClick={() => onTest(t)} className="rounded-lg bg-green-100 px-3 py-1.5 text-xs hover:bg-green-200">
+                <button onClick={() => onTest()} className="rounded-lg bg-green-100 px-3 py-1.5 text-xs hover:bg-green-200">
                   <Send className="mr-1 h-3 w-3" /> Test
                 </button>
                 {editingId === t.id && (

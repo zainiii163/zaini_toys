@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Calendar, User, Tag, ChevronRight } from 'lucide-react'
+import { Search, Calendar, User, ChevronRight } from 'lucide-react'
 import { useGetPostsQuery, useGetBlogCategoriesQuery } from '../app/services/blog'
-import SkeletonCard from '../components/SkeletonCard'
 
 export default function BlogPage() {
   const [page, setPage] = useState(1)

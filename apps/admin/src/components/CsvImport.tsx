@@ -58,25 +58,23 @@ export default function CsvImport() {
           continue
         }
 
-        const body = {
-          name: obj.name,
-          slug: obj.slug || obj.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-          price: Number(obj.price) || 0,
-          salePrice: obj.saleprice ? Number(obj.saleprice) : undefined,
-          sku: obj.sku || `SKU-${Date.now()}-${i}`,
-          description: obj.description || '',
-          shortDescription: obj.short_description || '',
-          availableStock: Number(obj.stock || obj.availablestock || 0),
-          minStockLevel: Number(obj.minstocklevel || 5),
-          weight: obj.weight ? Number(obj.weight) : undefined,
-          ageRange: obj.agerange || undefined,
-          material: obj.material || undefined,
-        }
+        const body = new FormData()
+        body.append('name', obj.name)
+        body.append('slug', obj.slug || obj.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'))
+        body.append('price', String(Number(obj.price) || 0))
+        if (obj.saleprice) body.append('salePrice', String(Number(obj.saleprice)))
+        body.append('sku', obj.sku || `SKU-${Date.now()}-${i}`)
+        body.append('description', obj.description || '')
+        body.append('shortDescription', obj.short_description || '')
+        body.append('availableStock', String(Number(obj.stock || obj.availablestock || 0)))
+        body.append('minStockLevel', String(Number(obj.minstocklevel || 5)))
+        if (obj.weight) body.append('weight', String(Number(obj.weight)))
+        if (obj.agerange) body.append('ageRange', obj.agerange)
+        if (obj.material) body.append('material', obj.material)
 
         try {
-          const res = await createProduct(body).unwrap()
-          if (res.success) success++
-          else errors.push(`Row ${i + 2}: ${res.error || 'Unknown error'}`)
+          await createProduct(body).unwrap()
+          success++
         } catch (err: any) {
           errors.push(`Row ${i + 2}: ${err?.data?.error || 'API error'}`)
         }

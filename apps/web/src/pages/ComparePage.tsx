@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { X, Plus, ArrowRight } from 'lucide-react'
+import { X, Plus } from 'lucide-react'
 import { useGetProductsQuery } from '../app/services/product'
-import ProductCard from '../components/ProductCard'
 import type { Product } from '../lib/types'
 
 const MAX_COMPARE = 4
@@ -10,7 +9,7 @@ const MAX_COMPARE = 4
 export default function ComparePage() {
   const [compareIds, setCompareIds] = useState<string[]>([])
   const [search, setSearch] = useState('')
-  const { data: productsData } = useGetProductsQuery({ limit: '50', ...(search && { search }) })
+  const { data: productsData } = useGetProductsQuery({ limit: 50, ...(search && { search }) })
 
   const allProducts: Product[] = productsData?.data || []
   const compareProducts = allProducts.filter((p) => compareIds.includes(p._id))

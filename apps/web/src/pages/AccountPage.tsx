@@ -187,6 +187,7 @@ export function OrdersTab() {
             ))}
           </div>
         </div>
+      </div>
       <div className="divide-y divide-gray-100">
         {filteredOrders.length === 0 ? (
           <div className="p-12 text-center text-gray-500">
@@ -196,7 +197,7 @@ export function OrdersTab() {
             </Link>
           </div>
         ) : (
-          {filteredOrders.map((order) => (
+          filteredOrders.map((order) => (
             <div key={order._id} className="flex flex-col gap-2 p-6 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-4">
                 <img src={order.items[0]?.productImage} alt="" className="h-16 w-16 rounded-lg object-cover" />

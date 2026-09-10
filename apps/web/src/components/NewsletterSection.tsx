@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { Mail, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Mail, CheckCircle, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { api } from '../app/api'
 
 export default function NewsletterSection() {
   const [email, setEmail] = useState('')
@@ -13,14 +12,19 @@ export default function NewsletterSection() {
     if (!email) return
     setLoading(true)
     try {
-      await api.post('/newsletter', { email })
+      const res = await fetch('/api/v1/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed to subscribe')
       toast.success('Subscribed! Check your inbox for a welcome discount.')
       setEmail('')
       setShowConfirmation(true)
       setTimeout(() => setShowConfirmation(false), 3000)
     } catch (err: any) {
-      const msg = err?.response?.data?.message || 'Failed to subscribe'
-      toast.error(msg)
+      toast.error(err?.message || 'Failed to subscribe')
     }
     setLoading(false)
   }

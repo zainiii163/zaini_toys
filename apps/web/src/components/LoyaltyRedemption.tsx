@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Gift, CreditCard, Star } from 'lucide-react'
+import { Star } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAppSelector } from '../hooks/typed'
 

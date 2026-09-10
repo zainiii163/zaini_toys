@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Send, Building2, Package, Phone, Mail, CheckCircle } from 'lucide-react'
+import { Send, Building2, Package, Truck, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function WholesalePage() {

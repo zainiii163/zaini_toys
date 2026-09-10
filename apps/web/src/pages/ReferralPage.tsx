@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Gift, Share2, Copy, Check, Users, DollarSign, Star } from 'lucide-react'
+import { Gift, Share2, Copy, Check, Users, Star } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAppSelector } from '../hooks/typed'
 
 export default function ReferralPage() {
   const auth = useAppSelector((s) => s.auth)
   const [copied, setCopied] = useState(false)
-  const referralCode = auth.user?.referralCode || 'TOY' + Math.random().toString(36).substring(2, 8).toUpperCase()
+  const referralCode = (auth.user as any)?.referralCode || 'TOY' + Math.random().toString(36).substring(2, 8).toUpperCase()
   const referralLink = `${window.location.origin}/register?ref=${referralCode}`
 
   const onCopy = async () => {

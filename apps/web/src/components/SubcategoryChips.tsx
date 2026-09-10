@@ -1,9 +1,4 @@
-import { useState } from 'react'
-import { X, Trash2 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
-import { useGetProductsQuery } from '../app/services/product'
-import ProductCard from './ProductCard'
-import type { Product } from '../lib/types'
+import { useGetCategoryTreeQuery } from '../app/services/category'
 
 interface Props {
   selectedCategory: string
@@ -22,7 +17,6 @@ const SUBCATEGORY_COLORS = [
 ]
 
 export default function SubcategoryChips({ selectedCategory, onSelectSubcategory }: Props) {
-  const navigate = useNavigate()
   const { data: categoriesData } = useGetCategoryTreeQuery()
   const categories = categoriesData?.data || []
   const mainCategory = categories.find((c) => c.slug === selectedCategory)
@@ -37,10 +31,7 @@ export default function SubcategoryChips({ selectedCategory, onSelectSubcategory
         {subcategories.map((sub, i) => (
           <button
             key={sub.slug}
-            onClick={() => {
-              const colorIdx = i % SUBCATEGORY_COLORS.length
-              navigate(`/shop?category=${selectedCategory}&subcategory=${sub.slug}`)
-            }}
+            onClick={() => onSelectSubcategory(sub.slug)}
             className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:opacity-80 ${SUBCATEGORY_COLORS[i % SUBCATEGORY_COLORS.length]}`}
           >
             {sub.name}

@@ -31,7 +31,7 @@ export default function SalesByCategoryChart() {
       if (order.status === 'cancelled') continue
       for (const item of order.items || []) {
         const category = productCategoryMap.get(item.productName?.toLowerCase() || '') || 'Uncategorized'
-        sales[category] = (sales[category] || 0) + (item.total || item.price * item.quantity || 0)
+        sales[category] = (sales[category] || 0) + ((item.price || 0) * item.quantity)
       }
     }
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Package, Star, ShoppingBag } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, Calendar, Package, Star, ShoppingBag } from 'lucide-react'
 
 const API = '/api/v1'
 

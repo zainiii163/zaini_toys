@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { Package, AlertTriangle, Send } from 'lucide-react'
+import { Package, Send } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useAppSelector } from '../hooks/typed'
 
 interface Props {
   order: any
@@ -9,7 +8,6 @@ interface Props {
 }
 
 export default function ReturnRequestForm({ order, onSubmitted }: Props) {
-  const auth = useAppSelector((s) => s.auth)
   const [showForm, setShowForm] = useState(false)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [reason, setReason] = useState('')
