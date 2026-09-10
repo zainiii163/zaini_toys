@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { ShoppingCart, Heart, Star, Truck, ShieldCheck, Share2, Minus, Plus, ChevronRight, ZoomIn } from 'lucide-react'
+import { ShoppingCart, Heart, Star, Truck, ShieldCheck, Share2, Minus, Plus, ZoomIn } from 'lucide-react'
 import { MessageCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useGetProductBySlugQuery, useGetRelatedProductsQuery } from '../app/services/product'
@@ -12,9 +12,11 @@ import ProductCard from '../components/ProductCard'
 import { addToRecentlyViewed } from '../lib/recentlyViewed'
 import PriceDropAlert from '../components/PriceDropAlert'
 import SEO from '../components/SEO'
+import Breadcrumb from '../components/Breadcrumb'
 import AgeVerificationModal from '../components/AgeVerificationModal'
 import ProductCareTab from '../components/ProductCareTab'
 import ProductBundles from '../components/ProductBundles'
+import Breadcrumb from '../components/Breadcrumb'
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -151,26 +153,11 @@ export default function ProductDetailPage() {
         type="product"
         keywords={[product.name, product.brand?.name, product.category?.name].filter(Boolean).join(', ')}
       />
-      {/* Breadcrumb */}
-      <nav className="mb-6 flex items-center gap-2 text-sm text-gray-500">
-        <Link to="/" className="hover:text-blue-600">Home</Link>
-        <ChevronRight className="h-3 w-3" />
-        <Link to="/shop" className="hover:text-blue-600">Shop</Link>
-        {product.category && (
-          <>
-            <ChevronRight className="h-3 w-3" />
-            <Link to={`/shop?category=${product.category?.slug || ''}`} className="hover:text-blue-600">{product.category?.name || 'Category'}</Link>
-          </>
-        )}
-        {product.brand && (
-          <>
-            <ChevronRight className="h-3 w-3" />
-            <Link to={`/shop?brand=${product.brand?.slug || ''}`} className="hover:text-blue-600">{product.brand?.name}</Link>
-          </>
-        )}
-        <ChevronRight className="h-3 w-3" />
-        <span className="truncate max-w-[200px] text-gray-900">{product.name}</span>
-      </nav>
+      <Breadcrumb items={[
+        { label: product.category?.name || 'Category', path: `/shop?category=${product.category?.slug || ''}` },
+        { label: product.brand?.name || '', path: product.brand ? `/shop?brand=${product.brand?.slug || ''}` : undefined },
+        { label: product.name },
+      ]} />
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Gallery */}

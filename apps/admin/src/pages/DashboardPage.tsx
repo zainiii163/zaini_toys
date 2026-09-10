@@ -9,6 +9,7 @@ import SalesByCategoryChart from '../components/SalesByCategoryChart'
 import SalesTrendChart from '../components/SalesTrendChart'
 import TopCustomersChart from '../components/TopCustomersChart'
 import CustomerSegmentation from '../components/CustomerSegmentation'
+import RevenueChartWithDateRange from '../components/RevenueChartWithDateRange'
 
 export default function DashboardPage() {
   const { data: ordersData, isLoading: ordersLoading } = useGetOrdersQuery({ limit: '10', sort: '-createdAt' })
@@ -128,6 +129,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Sales Trend */}
+      <RevenueChartWithDateRange />
       <SalesTrendChart />
 
       {/* Recent Orders + Sidebar */}

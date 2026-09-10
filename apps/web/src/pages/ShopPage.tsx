@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, Star, LayoutGrid, List } from 'lucide-react'
+import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, Star, LayoutGrid, List, ArrowLeftRight } from 'lucide-react'
 import { useGetProductsQuery } from '../app/services/product'
 import { useGetCategoryTreeQuery } from '../app/services/category'
 import { useGetBrandsQuery } from '../app/services/brand'
+import { useAppSelector } from '../hooks/typed'
 import ProductCard from '../components/ProductCard'
 import SkeletonCard from '../components/SkeletonCard'
 import SEO from '../components/SEO'
 import SubcategoryChips from '../components/SubcategoryChips'
+import Breadcrumb from '../components/Breadcrumb'
 
 const SORTS = [
   { value: '', label: 'Relevance' },
@@ -95,6 +97,16 @@ export default function ShopPage() {
     params.get('availability'),
   ].filter(Boolean).length
 
+  const [compareIds, setCompareIds] = useState<string[]>([])
+
+  const toggleCompare = (id: string) => {
+    setCompareIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id)
+      if (prev.length >= 4) { toast.error('Maximum 4 products to compare') return prev }
+      return [...prev, id]
+    })
+  }
+
   const updateParam = (key: string, value: string) => {
     const next = new URLSearchParams(params)
     if (value) next.set(key, value)
@@ -150,6 +162,11 @@ export default function ShopPage() {
         title={query.search ? `Search: ${query.search}` : 'Shop All Toys'}
         description="Browse our wide selection of educational, fun, and safe toys for kids of all ages. Free delivery on orders over Rs. 3,000."
       />
+      <Breadcrumb items={[
+        { label: query.search ? `Search: "${query.search}"` : undefined },
+        { label: query.category ? categories.find((c) => c.slug === query.category)?.name || 'Category' : undefined },
+        { label: 'All Toys' },
+      ].filter((i): i is { label: string } => !!i)} />
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
@@ -373,7 +390,7 @@ export default function ShopPage() {
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {products.map((p) => <ProductCard key={p._id} product={p} />)}
+              {products.map((p) => <ProductCard key={p._id} product={p} compareIds={compareIds} onCompare={toggleCompare} />)}
             </div>
           ) : (
             <div className="space-y-3">
@@ -405,11 +422,19 @@ export default function ShopPage() {
                           {p.availableStock > 0 ? `${p.availableStock} in stock` : 'Out of stock'}
                         </span>
                       </div>
-                      {p.shortDescription && <p className="mt-1 text-xs text-gray-500 line-clamp-2">{p.shortDescription}</p>}
-                    </div>
-                  </Link>
-                )
-              })}
+                       {p.shortDescription && <p className="mt-1 text-xs text-gray-500 line-clamp-2">{p.shortDescription}</p>}
+                       <button
+                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCompare(p._id) }}
+                         className={`mt-2 flex items-center gap-1 rounded-lg px-3 py-1 text-xs font-medium ${
+                           compareIds.includes(p._id) ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                         }`}
+                       >
+                         <ArrowLeftRight className="h-3 w-3" /> {compareIds.includes(p._id) ? 'In compare' : 'Compare'}
+                       </button>
+                     </div>
+                   </Link>
+                 )
+               })}
             </div>
           )}
 
