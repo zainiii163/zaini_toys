@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Truck, MapPin, CheckCircle, Package, AlertCircle } from 'lucide-react'
 import { useGetOrderByNumberQuery } from '../app/services/order'
 import { formatDate } from '../lib/utils'
+import InvoiceDownload from '../components/InvoiceDownload'
 
 const STATUS_STEPS = [
   { key: 'pending', label: 'Order Placed', icon: Package },
@@ -58,7 +59,10 @@ export default function OrderTrackingPage() {
             <h1 className="font-display text-2xl font-semibold">Track Order #{order.orderNumber}</h1>
             <p className="text-gray-500">Placed on {formatDate(order.createdAt)}</p>
           </div>
-          <Link to="/account/orders" className="text-sm text-blue-600 hover:underline">← Back to Orders</Link>
+          <div className="flex items-center gap-2">
+            <InvoiceDownload order={order} />
+            <Link to="/account/orders" className="text-sm text-blue-600 hover:underline">← Back to Orders</Link>
+          </div>
         </div>
 
         {/* Progress */}

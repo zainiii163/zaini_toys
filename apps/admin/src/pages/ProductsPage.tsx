@@ -4,6 +4,7 @@ import { Plus, Pencil, Trash2, Search, Download, CheckSquare, Square, Eye, EyeOf
 import toast from 'react-hot-toast'
 import { useGetProductsQuery, useDeleteProductMutation, useUpdateProductMutation } from '../app/services/product'
 import { exportToCSV, productsToCSV } from '../lib/exportCSV'
+import CsvImport from '../components/CsvImport'
 
 export default function ProductsPage() {
   const [search, setSearch] = useState('')
@@ -92,6 +93,10 @@ export default function ProductsPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1) }} className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Search products..." />
         </div>
+      </div>
+
+      <div className="mb-6">
+        <CsvImport />
       </div>
 
       {isLoading ? <p className="text-gray-500">Loading...</p> : (

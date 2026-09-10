@@ -6,6 +6,8 @@ import { useGetCategoriesQuery } from '../app/services/category'
 import { useGetCouponsQuery } from '../app/services/coupon'
 import { DollarSign, ShoppingCart, Package, Users, AlertTriangle, Clock, TrendingUp, Star, Eye, BarChart3, ArrowUpRight, ArrowDownRight, RotateCcw } from 'lucide-react'
 import SalesByCategoryChart from '../components/SalesByCategoryChart'
+import SalesTrendChart from '../components/SalesTrendChart'
+import TopCustomersChart from '../components/TopCustomersChart'
 
 export default function DashboardPage() {
   const { data: ordersData, isLoading: ordersLoading } = useGetOrdersQuery({ limit: '10', sort: '-createdAt' })
@@ -124,7 +126,11 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      {/* Sales Trend */}
+      <SalesTrendChart />
+
+      {/* Recent Orders + Sidebar */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-3">
         {/* Recent Orders */}
         <div className="stat-card lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
@@ -168,9 +174,10 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Sales by Category + Quick Actions */}
+        {/* Sales by Category + Top Customers + Quick Actions */}
         <div className="space-y-6">
           <SalesByCategoryChart />
+          <TopCustomersChart />
 
           {/* Quick Actions */}
           <div className="stat-card">
