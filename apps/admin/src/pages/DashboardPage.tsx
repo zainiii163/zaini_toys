@@ -8,6 +8,7 @@ import { DollarSign, ShoppingCart, Package, Users, AlertTriangle, Clock, Trendin
 import SalesByCategoryChart from '../components/SalesByCategoryChart'
 import SalesTrendChart from '../components/SalesTrendChart'
 import TopCustomersChart from '../components/TopCustomersChart'
+import CustomerSegmentation from '../components/CustomerSegmentation'
 
 export default function DashboardPage() {
   const { data: ordersData, isLoading: ordersLoading } = useGetOrdersQuery({ limit: '10', sort: '-createdAt' })
@@ -178,6 +179,7 @@ export default function DashboardPage() {
         <div className="space-y-6">
           <SalesByCategoryChart />
           <TopCustomersChart />
+          <CustomerSegmentation />
 
           {/* Quick Actions */}
           <div className="stat-card">

@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { useGetProductsQuery, useDeleteProductMutation, useUpdateProductMutation } from '../app/services/product'
 import { exportToCSV, productsToCSV } from '../lib/exportCSV'
 import CsvImport from '../components/CsvImport'
+import BulkEditPanel from '../components/BulkEditPanel'
 
 export default function ProductsPage() {
   const [search, setSearch] = useState('')
@@ -87,6 +88,8 @@ export default function ProductsPage() {
           <button onClick={() => setSelectedIds([])} className="ml-auto text-xs text-blue-600 hover:underline">Clear</button>
         </div>
       )}
+
+      {selectedIds.length > 0 && <BulkEditPanel selectedIds={selectedIds} onComplete={() => setSelectedIds([])} />}
 
       <div className="stat-card mb-6">
         <div className="relative">
