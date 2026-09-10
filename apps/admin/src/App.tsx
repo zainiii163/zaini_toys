@@ -31,6 +31,8 @@ import CouponAnalyticsPage from './pages/CouponAnalyticsPage'
 import ReturnsPage from './pages/ReturnsPage'
 import NewsletterPage from './pages/NewsletterPage'
 import EmailTemplatesPage from './pages/EmailTemplatesPage'
+import CustomerCommunicationPage from './pages/CustomerCommunicationPage'
+import StockAlertsPage from './pages/StockAlertsPage'
 
 function AuthBootstrap({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch()
@@ -70,6 +72,8 @@ const router = createBrowserRouter([
       { path: 'returns', element: <ReturnsPage /> },
       { path: 'newsletter', element: <NewsletterPage /> },
       { path: 'email-templates', element: <EmailTemplatesPage /> },
+      { path: 'communication', element: <CustomerCommunicationPage /> },
+      { path: 'stock-alerts', element: <StockAlertsPage /> },
       { path: 'customers', element: <CustomersPage /> },
       { path: 'customers/:id', element: <CustomerDetailPage /> },
       { path: 'categories', element: <CategoriesPage /> },

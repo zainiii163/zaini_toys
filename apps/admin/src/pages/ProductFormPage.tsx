@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useGetProductQuery, useCreateProductMutation, useUpdateProductMutation } from '../app/services/product'
 import { useGetCategoriesQuery } from '../app/services/category'
 import { useGetBrandsQuery } from '../app/services/brand'
+import VariantManager from '../components/VariantManager'
 
 export default function ProductFormPage() {
   const { id } = useParams<{ id: string }>()
@@ -22,6 +23,7 @@ export default function ProductFormPage() {
   })
   const [images, setImages] = useState<FileList | null>(null)
   const [error, setError] = useState('')
+  const [variants, setVariants] = useState<{ name: string; value: string; sku: string; stock: number }[]>([])
 
   useEffect(() => {
     if (existing?.data) {
@@ -146,6 +148,8 @@ export default function ProductFormPage() {
             ))}
           </div>
         </div>
+
+        <VariantManager variants={variants} onChange={setVariants} />
 
         <div className="flex gap-3">
           <button type="submit" className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700">
