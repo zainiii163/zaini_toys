@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { ShoppingCart, Heart, Star, Truck, ShieldCheck, Share2, Minus, Plus, ChevronRight, ZoomIn, Copy } from 'lucide-react'
+import { ShoppingCart, Heart, Star, Truck, ShieldCheck, Share2, Minus, Plus, ChevronRight, ZoomIn } from 'lucide-react'
 import { MessageCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useGetProductBySlugQuery, useGetRelatedProductsQuery } from '../app/services/product'
@@ -12,6 +12,9 @@ import ProductCard from '../components/ProductCard'
 import { addToRecentlyViewed } from '../lib/recentlyViewed'
 import PriceDropAlert from '../components/PriceDropAlert'
 import SEO from '../components/SEO'
+import AgeVerificationModal from '../components/AgeVerificationModal'
+import ProductCareTab from '../components/ProductCareTab'
+import ProductBundles from '../components/ProductBundles'
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -20,6 +23,7 @@ export default function ProductDetailPage() {
   const [galleryIdx, setGalleryIdx] = useState(0)
   const [activeTab, setActiveTab] = useState<'details' | 'reviews' | 'shipping'>('details')
   const [zoomPos, setZoomPos] = useState<{ x: number; y: number } | null>(null)
+  const [showAgeVerify, setShowAgeVerify] = useState(false)
   const [addToCart, { isLoading: adding }] = useAddToCartMutation()
   const [createWishlist] = useCreateWishlistMutation()
   const [addToWishlist] = useAddToWishlistMutation()
@@ -60,6 +64,17 @@ export default function ProductDetailPage() {
   }
 
   const product = productData.data
+
+  if (product.ageRestriction && product.ageRestriction > 0) {
+    if (!auth.isAuthenticated) {
+      navigate('/login', { state: { from: `/product/${slug}` } })
+      return null
+    }
+    if (auth.user && auth.user.age < product.ageRestriction) {
+      return <AgeVerificationModal open={showAgeVerify} onAccept={() => setShowAgeVerify(false)} onDecline={() => navigate('/')} />
+    }
+  }
+
   const images = product.images || []
   const videos = (product as any).videos || []
   const allMedia = [
@@ -355,122 +370,13 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Care & Safety Tabs */}
       <div className="mt-12">
-        <div className="border-b border-gray-200">
-          <nav className="flex gap-6" role="tablist">
-            {['details', 'reviews', 'shipping'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab as any)}
-                className={`pb-4 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === tab ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                {tab === 'reviews' && summaryData?.data?.total && (
-                  <span className="ml-1 text-sm text-gray-400">({summaryData.data.total})</span>
-                )}
-              </button>
-            ))}
-          </nav>
-        </div>
-
-        <div className="py-6">
-          {activeTab === 'details' && (
-            <div className="prose max-w-none">
-              <h3 className="font-semibold">Product Description</h3>
-              <p className="whitespace-pre-wrap mt-2">{product.description}</p>
-              {product.material?.length > 0 && (
-                <>
-                  <h3 className="mt-6 font-semibold">Materials</h3>
-                  <ul className="list-disc list-inside mt-2">{product.material.map((m) => <li key={m}>{m}</li>)}</ul>
-                </>
-              )}
-              {product.educationalBenefits?.length > 0 && (
-                <>
-                  <h3 className="mt-6 font-semibold">Educational Benefits</h3>
-                  <ul className="list-disc list-inside mt-2">{product.educationalBenefits.map((b) => <li key={b}>{b}</li>)}</ul>
-                </>
-              )}
-              {product.safetyWarnings?.length > 0 && (
-                <>
-                  <h3 className="mt-6 font-semibold">Safety Warnings</h3>
-                  <ul className="list-disc list-inside mt-2">{product.safetyWarnings.map((w) => <li key={w}>{w}</li>)}</ul>
-                </>
-              )}
-              {product.dimensions && (
-                <>
-                  <h3 className="mt-6 font-semibold">Dimensions</h3>
-                  <p>L: {product.dimensions.length}cm × W: {product.dimensions.width}cm × H: {product.dimensions.height}cm</p>
-                </>
-              )}
-              {product.weight && (
-                <p>Weight: {product.weight}g</p>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'reviews' && (
-            <div>
-              {summaryData?.data && (
-                <div className="mb-6 grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-xl bg-gray-50 p-6">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-5xl font-bold">{summaryData.data.average?.toFixed(1) || '0.0'}</span>
-                      <div>
-                        <Star className="h-6 w-6 fill-amber-400 text-amber-400" />
-                        <span className="text-gray-500 text-sm">({summaryData.data.total || 0} reviews)</span>
-                      </div>
-                    </div>
-                    <div className="mt-4 space-y-1">
-                      {[5, 4, 3, 2, 1].map((star) => (
-                        <div key={star} className="flex items-center gap-2">
-                          <span className="w-8 text-right text-sm">{star}★</span>
-                          <div className="flex-1 h-2 bg-gray-200 rounded">
-                            <div
-                              className="h-full bg-amber-400 rounded"
-                              style={{ width: `${(summaryData.data.counts as any)?.[star] ? ((summaryData.data.counts as any)[star] / summaryData.data.total) * 100 : 0}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {reviewsData?.data?.slice(0, 3).map((r: any) => (
-                      <div key={r._id} className="card-toy p-4">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{r.user?.name || 'Anonymous'}</span>
-                          <span className="text-gray-400 text-xs">{new Date(r.createdAt).toLocaleDateString()}</span>
-                        </div>
-                        <div className="mt-1 flex gap-0.5">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star key={s} className={`h-4 w-4 ${s <= r.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} />
-                          ))}
-                        </div>
-                        <p className="mt-2 text-sm">{r.comment}</p>
-                      </div>
-                    ))}
-                    <Link to={`/product/${slug}#reviews`} className="text-sm text-blue-600 hover:underline">View all reviews</Link>
-                  </div>
-                </div>
-              )}
-              {reviewsData?.data?.length === 0 && <p className="text-gray-500">No reviews yet. Be the first to review!</p>}
-            </div>
-          )}
-
-          {activeTab === 'shipping' && (
-            <div className="space-y-4 text-gray-700 text-sm">
-              <p><strong>Standard Shipping:</strong> 3-5 business days (Free over Rs. 3,000)</p>
-              <p><strong>Express Shipping:</strong> 1-2 business days (Rs. 500)</p>
-              <p><strong>Same Day Delivery:</strong> Available in Karachi & Lahore (Rs. 800)</p>
-              <p><strong>Returns:</strong> 7-day return policy. Items must be unused in original packaging with tags attached.</p>
-              <p><strong>Refunds:</strong> Processed within 5-7 business days after receiving the return.</p>
-            </div>
-          )}
-        </div>
+        <ProductCareTab product={product} />
       </div>
+
+      {/* Product Bundles */}
+      <ProductBundles currentProduct={product} />
 
       {/* Related Products */}
       {relatedData?.data && relatedData.data.length > 0 && (

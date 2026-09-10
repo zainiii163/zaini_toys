@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, Star, LayoutGrid, List, ShoppingCart } from 'lucide-react'
+import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, Star, LayoutGrid, List } from 'lucide-react'
 import { useGetProductsQuery } from '../app/services/product'
 import { useGetCategoryTreeQuery } from '../app/services/category'
 import { useGetBrandsQuery } from '../app/services/brand'
 import ProductCard from '../components/ProductCard'
 import SkeletonCard from '../components/SkeletonCard'
 import SEO from '../components/SEO'
+import SubcategoryChips from '../components/SubcategoryChips'
 
 const SORTS = [
   { value: '', label: 'Relevance' },
@@ -221,6 +222,8 @@ export default function ShopPage() {
           <button onClick={clearAllFilters} className="text-xs text-gray-500 hover:text-red-600 underline">Clear all</button>
         </div>
       )}
+
+      <SubcategoryChips selectedCategory={params.get('category') || ''} onSelectSubcategory={(sub) => updateParam('subcategory', sub)} />
 
       <form onSubmit={onSearch} className="mb-6 flex max-w-lg gap-2">
         <div className="flex flex-1 items-center rounded-lg border border-gray-300 bg-white px-3">

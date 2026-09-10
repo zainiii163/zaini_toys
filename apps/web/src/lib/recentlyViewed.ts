@@ -1,4 +1,4 @@
-import type { Product } from '../app/services/product'
+import type { Product } from './types'
 
 const RECENTLY_VIEWED_KEY = 'recently_viewed'
 const MAX_ITEMS = 20
@@ -17,6 +17,13 @@ export function addToRecentlyViewed(product: Product): void {
     const items = getRecentlyViewed().filter((p) => p._id !== product._id)
     items.unshift(product)
     localStorage.setItem(RECENTLY_VIEWED_KEY, JSON.stringify(items.slice(0, MAX_ITEMS)))
+  } catch {}
+}
+
+export function removeFromRecentlyViewed(productId: string): void {
+  try {
+    const items = getRecentlyViewed().filter((p) => p._id !== productId)
+    localStorage.setItem(RECENTLY_VIEWED_KEY, JSON.stringify(items))
   } catch {}
 }
 
