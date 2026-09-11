@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BarChart3, TrendingUp, DollarSign } from 'lucide-react'
-
-const API = '/api/v1'
+import { apiFetch } from '../lib/api'
 
 interface DailySales {
   date: string
@@ -27,8 +26,8 @@ export default function CouponAnalyticsPage() {
       setLoading(true)
       try {
 const [statsRes, salesRes] = await Promise.all([
-        fetch(`${API}/coupons/stats`).then((r) => r.json()).catch(() => ({ data: null })),
-        fetch(`${API}/orders/stats/daily?period=${period}`).then((r) => r.json()).catch(() => ({ data: [] })),
+        apiFetch('/coupons/admin/stats').then((r) => r.json()).catch(() => ({ data: null })),
+        apiFetch(`/orders/admin/stats/daily?period=${period}`).then((r) => r.json()).catch(() => ({ data: [] })),
       ])
       setCouponStats(statsRes.data)
       setDailySales(salesRes.data || [])

@@ -48,7 +48,8 @@ export const resetPasswordSchema = z.object({
 });
 
 export const refreshTokenSchema = z.object({
-  refreshToken: z.string().min(1),
+  // Refresh tokens are read from the httpOnly cookie; a body token is ignored.
+  refreshToken: z.string().min(1).optional(),
 });
 
 export const verifyEmailSchema = z.object({

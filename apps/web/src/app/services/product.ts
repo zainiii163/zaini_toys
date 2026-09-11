@@ -7,6 +7,7 @@ export interface ProductQuery {
   search?: string
   category?: string
   brand?: string
+  gender?: string
   minPrice?: number
   maxPrice?: number
   ageMin?: number

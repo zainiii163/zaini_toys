@@ -63,6 +63,7 @@ export default function ShopPage() {
     search: params.get('search') || undefined,
     category: params.get('category') || undefined,
     brand: params.get('brand') || undefined,
+    gender: params.get('gender') || undefined,
     minPrice: params.get('minPrice') ? Number(params.get('minPrice')) : undefined,
     maxPrice: params.get('maxPrice') ? Number(params.get('maxPrice')) : undefined,
     ageMin: params.get('ageMin') ? Number(params.get('ageMin')) : undefined,
@@ -88,6 +89,7 @@ export default function ShopPage() {
   const activeFilterCount = [
     params.get('category'),
     params.get('brand'),
+    params.get('gender'),
     params.get('minPrice'),
     params.get('maxPrice'),
     params.get('ageMin'),
@@ -231,6 +233,12 @@ export default function ShopPage() {
             <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
               {params.get('rating')}+ Stars
               <button onClick={() => updateParam('rating', '')}><X className="h-3 w-3" /></button>
+            </span>
+          )}
+          {params.get('gender') && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
+              {params.get('gender') === 'male' ? 'Boys' : 'Girls'}
+              <button onClick={() => updateParam('gender', '')}><X className="h-3 w-3" /></button>
             </span>
           )}
           {params.get('onSale') && (
@@ -418,7 +426,7 @@ export default function ShopPage() {
                       </div>
                       <div className="mt-auto flex items-center justify-between pt-2">
                         <div className="flex items-baseline gap-2">
-                          <span className="text-lg font-bold text-gray-900">Rs. {price.toLocaleString()}</span>
+                          <span className={`text-lg font-bold ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>Rs. {price.toLocaleString()}</span>
                           {original && <span className="text-sm text-gray-400 line-through">Rs. {original.toLocaleString()}</span>}
                         </div>
                         <span className={`text-xs font-medium ${p.availableStock > 0 ? 'text-green-600' : 'text-red-600'}`}>

@@ -23,3 +23,19 @@ export const otpLimiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, error: 'Too many OTP requests, please wait and try again.' },
 });
+
+export const verifyOtpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many OTP attempts, please wait and try again.' },
+});
+
+export const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many refresh requests, please log in again.' },
+});

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
-
-const API = '/api/v1'
+import { apiFetch } from '../lib/api'
 
 interface BlogPost {
   _id: string
@@ -31,7 +30,7 @@ export default function BlogManagerPage() {
   const fetchPosts = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`${API}/blog/admin/all`)
+      const res = await apiFetch('/blog/admin/all')
       const data = await res.json()
       setPosts(data.data || [])
     } catch {}
@@ -49,10 +48,10 @@ export default function BlogManagerPage() {
     if (!title.trim() || !content.trim()) { toast.error('Title and content required'); return }
     try {
       if (editingId) {
-        await fetch(`${API}/blog/${editingId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, excerpt, category, isPublished }) })
+        await apiFetch(`/blog/${editingId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, excerpt, category, isPublished }) })
         toast.success('Post updated')
       } else {
-        await fetch(`${API}/blog`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, excerpt, category, isPublished }) })
+        await apiFetch('/blog', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, excerpt, category, isPublished }) })
         toast.success('Post created')
       }
       resetForm()
@@ -68,11 +67,11 @@ export default function BlogManagerPage() {
 
   const onDelete = async (id: string) => {
     if (!confirm('Delete this post?')) return
-    try { await fetch(`${API}/blog/${id}`, { method: 'DELETE' }); toast.success('Deleted'); fetchPosts() } catch { toast.error('Failed') }
+    try { await apiFetch(`/blog/${id}`, { method: 'DELETE' }); toast.success('Deleted'); fetchPosts() } catch { toast.error('Failed') }
   }
 
   const togglePublish = async (post: BlogPost) => {
-    try { await fetch(`${API}/blog/${post._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isPublished: !post.isPublished }) }); toast.success(post.isPublished ? 'Unpublished' : 'Published'); fetchPosts() } catch { toast.error('Failed') }
+    try { await apiFetch(`/blog/${post._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isPublished: !post.isPublished }) }); toast.success(post.isPublished ? 'Unpublished' : 'Published'); fetchPosts() } catch { toast.error('Failed') }
   }
 
   return (

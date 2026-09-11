@@ -3,7 +3,7 @@ import { User } from '../models/User';
 import bcrypt from 'bcryptjs';
 import { AppError } from '../utils/AppError';
 import { asyncHandler } from '../utils/asyncHandler';
-import { getPaginationParams, getPaginationMeta } from '@toys/utils';
+import { getPaginationParams, getPaginationMeta, escapeRegExp } from '@toys/utils';
 import type { AuthRequest } from '../middleware/auth';
 
 // @desc    Admin: Get all users
@@ -18,9 +18,9 @@ export const adminGetUsers = asyncHandler(async (req: AuthRequest, res: Response
   if (status === 'blocked') filter.isBlocked = true;
   if (search) {
     filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } },
-      { phone: { $regex: search, $options: 'i' } },
+      { name: { $regex: escapeRegExp(String(search)), $options: 'i' } },
+      { email: { $regex: escapeRegExp(String(search)), $options: 'i' } },
+      { phone: { $regex: escapeRegExp(String(search)), $options: 'i' } },
     ];
   }
 

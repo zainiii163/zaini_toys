@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { Truck, MapPin, CheckCircle, Package, AlertCircle } from 'lucide-react'
-import { useGetOrderByNumberQuery } from '../app/services/order'
+import { useGetOrderByNumberQuery, usePublicTrackOrderQuery } from '../app/services/order'
+import { useAppSelector } from '../hooks/typed'
 import { formatDate } from '../lib/utils'
 import InvoiceDownload from '../components/InvoiceDownload'
 
@@ -16,7 +17,15 @@ const STATUS_STEPS = [
 
 export default function OrderTrackingPage() {
   const { orderNumber } = useParams<{ orderNumber: string }>()
-  const { data: orderData, isLoading } = useGetOrderByNumberQuery(orderNumber || '', { skip: !orderNumber })
+  const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated)
+  const authedQuery = useGetOrderByNumberQuery(orderNumber || '', {
+    skip: !orderNumber || !isAuthenticated,
+  })
+  const publicQuery = usePublicTrackOrderQuery(orderNumber || '', {
+    skip: !orderNumber || isAuthenticated,
+  })
+  const orderData = isAuthenticated ? authedQuery : publicQuery
+  const isLoading = orderData.isLoading || !orderData.data
 
   if (isLoading) {
     return (
@@ -36,7 +45,7 @@ export default function OrderTrackingPage() {
       </div>
     )
   }
-  if (!orderData?.success || !orderData.data) {
+  if (!orderData.data?.success || !orderData.data.data) {
     return (
       <div className="container-toy py-20 text-center">
         <AlertCircle className="mx-auto h-16 w-16 text-gray-300" />
@@ -47,7 +56,7 @@ export default function OrderTrackingPage() {
     )
   }
 
-  const order = orderData.data
+  const order = orderData.data.data
   const currentIndex = STATUS_STEPS.findIndex((s) => s.key === order.status)
   const statusHistory = order.statusHistory || []
 
@@ -60,7 +69,7 @@ export default function OrderTrackingPage() {
             <p className="text-gray-500">Placed on {formatDate(order.createdAt)}</p>
           </div>
           <div className="flex items-center gap-2">
-            <InvoiceDownload order={order} />
+            {isAuthenticated && <InvoiceDownload order={order as any} />}
             <Link to="/account/orders" className="text-sm text-blue-600 hover:underline">← Back to Orders</Link>
           </div>
         </div>
@@ -109,22 +118,24 @@ export default function OrderTrackingPage() {
           <div className="card-toy p-6">
             <h3 className="font-semibold mb-3">Shipping Details</h3>
             <dl className="space-y-2 text-sm">
-              <div className="flex justify-between"><dt className="text-gray-500">Method</dt><dd className="font-medium">{order.shippingMethod === 'standard' ? 'Standard' : order.shippingMethod === 'express' ? 'Express' : 'Same Day'}</dd></div>
+              <div className="flex justify-between"><dt className="text-gray-500">Method</dt><dd className="font-medium">{order.shippingMethod ? (order.shippingMethod === 'standard' ? 'Standard' : order.shippingMethod === 'express' ? 'Express' : 'Same Day') : '—'}</dd></div>
               <div className="flex justify-between"><dt className="text-gray-500">Estimated Delivery</dt><dd className="font-medium">{order.estimatedDelivery ? formatDate(order.estimatedDelivery) : '—'}</dd></div>
               <div className="flex justify-between"><dt className="text-gray-500">Courier</dt><dd className="font-medium">{order.courierService || '—'}</dd></div>
               <div className="flex justify-between"><dt className="text-gray-500">Tracking #</dt><dd className="font-medium">{order.trackingNumber || '—'}</dd></div>
             </dl>
           </div>
-          <div className="card-toy p-6">
-            <h3 className="font-semibold mb-3">Shipping Address</h3>
-            <address className="text-sm text-gray-700 not-italic">
-              {order.shippingAddress.fullName}<br />
-              {order.shippingAddress.address}<br />
-              {order.shippingAddress.area}, {order.shippingAddress.city}<br />
-              {order.shippingAddress.postalCode}<br />
-              Phone: {order.shippingAddress.phone}
-            </address>
-          </div>
+          {order.shippingAddress && (
+            <div className="card-toy p-6">
+              <h3 className="font-semibold mb-3">Shipping Address</h3>
+              <address className="text-sm text-gray-700 not-italic">
+                {order.shippingAddress.fullName}<br />
+                {order.shippingAddress.address}<br />
+                {order.shippingAddress.area}, {order.shippingAddress.city}<br />
+                {order.shippingAddress.postalCode}<br />
+                Phone: {order.shippingAddress.phone}
+              </address>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -66,9 +66,13 @@ export const removeWishlistItem = asyncHandler(async (req: AuthRequest, res: Res
 // @desc    Update wishlist
 // @route   PUT /api/v1/wishlist/:id
 export const updateWishlist = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const updateData: { name?: string; isPublic?: boolean } = {};
+  if (typeof req.body.name === 'string') updateData.name = req.body.name;
+  if (typeof req.body.isPublic === 'boolean') updateData.isPublic = req.body.isPublic;
+
   const wishlist = await Wishlist.findOneAndUpdate(
     { _id: req.params.id, user: req.user._id },
-    { $set: req.body },
+    { $set: updateData },
     { new: true },
   );
   if (!wishlist) throw new AppError('Wishlist not found', 404);

@@ -131,8 +131,8 @@ export default function ProductCard({ product, onQuickView, onCompare, compareId
 
         <div className="mt-2 flex items-end justify-between">
           <div className="flex flex-wrap items-baseline gap-2">
-            <span className="text-lg font-bold text-gray-900">Rs. {price.toLocaleString()}</span>
-            {original && <span className="text-sm text-gray-400 line-through">{original.toLocaleString()}</span>}
+            <span className={`text-lg font-bold ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>Rs. {price.toLocaleString()}</span>
+            {original && <span className="text-sm text-gray-400 line-through">Rs. {original.toLocaleString()}</span>}
           </div>
         </div>
 

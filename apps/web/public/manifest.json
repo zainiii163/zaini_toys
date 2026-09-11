@@ -4,8 +4,8 @@
   "description": "Pakistan's #1 online toy store for kids of all ages",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f9fafb",
-  "theme_color": "#2563eb",
+  "background_color": "#faf9f6",
+  "theme_color": "#0d9488",
   "orientation": "portrait-primary",
   "icons": [
     {

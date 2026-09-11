@@ -46,8 +46,8 @@ export default function CustomersPage() {
                     <p className="text-xs text-gray-500">{u.email || u.phone}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${u.role === 'admin' ? 'bg-red-100 text-red-700' : u.role === 'staff' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
-                      {u.role}
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${u.role === 'admin' ? 'bg-red-100 text-red-700' : u.role === 'customer' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {u.role.replace('_', ' ')}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm">{u.loyaltyTier} ({u.loyaltyPoints} pts)</td>

@@ -4,6 +4,7 @@ import { Eye, EyeOff, Mail, Phone, Lock } from 'lucide-react'
 import { useLoginMutation, useSendOtpMutation, useVerifyOtpMutation } from '../app/services/auth'
 import { useAppDispatch } from '../hooks/typed'
 import { setUser } from '../store/authSlice'
+import type { User } from '../lib/types'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -52,8 +53,9 @@ export default function LoginPage() {
     if (!otp || otp.length !== 6) return setError('Enter 6-digit OTP')
     setError('')
     try {
-      await verifyOtp({ phone, otp, purpose: 'login' }).unwrap()
-      dispatch(setUser({ _id: '', name: '', email: '', phone, role: 'customer', addresses: [], loyaltyPoints: 0, loyaltyTier: 'bronze', wishlist: [] }))
+      const res = await verifyOtp({ phone, otp, purpose: 'login' }).unwrap()
+      const data = res.data as { user: User }
+      dispatch(setUser(data.user))
       navigate(from, { replace: true })
     } catch (err: any) {
       setError(err?.data?.error || 'Invalid OTP')

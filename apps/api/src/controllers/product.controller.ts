@@ -13,6 +13,7 @@ interface QueryParams {
   search?: string;
   category?: string;
   brand?: string;
+  gender?: string;
   minPrice?: number;
   maxPrice?: number;
   ageMin?: number;
@@ -36,6 +37,9 @@ const DEFAULT_POPULATE = [
   { path: 'category', select: 'name slug' },
 ];
 
+// Fields never exposed through public (unauthenticated) product reads
+const PUBLIC_SELECT = '-costPrice -profitMargin';
+
 // @desc    Get all products with filtering, sorting, pagination
 // @route   GET /api/v1/products
 export const getProducts = asyncHandler(async (req: Request, res: Response) => {
@@ -43,6 +47,7 @@ export const getProducts = asyncHandler(async (req: Request, res: Response) => {
     search,
     category,
     brand,
+    gender,
     minPrice,
     maxPrice,
     ageMin,
@@ -115,6 +120,9 @@ export const getProducts = asyncHandler(async (req: Request, res: Response) => {
   }
 
   // Color / Material / Skill
+  // Gender
+  if (gender) filter.gender = gender;
+
   if (color) filter.color = color;
   if (material) filter.material = material;
   if (skill) filter.skillDevelopment = skill;
@@ -142,6 +150,7 @@ export const getProducts = asyncHandler(async (req: Request, res: Response) => {
 
   const [products, total] = await Promise.all([
     Product.find(filter)
+      .select(PUBLIC_SELECT)
       .populate(DEFAULT_POPULATE)
       .sort(sortBy)
       .skip(skip)
@@ -160,6 +169,7 @@ export const getProducts = asyncHandler(async (req: Request, res: Response) => {
 export const getFeatured = asyncHandler(async (req: Request, res: Response) => {
   const limit = Math.min(Number(req.query.limit) || 12, 50);
   const products = await Product.find({ isActive: true, isFeatured: true })
+    .select(PUBLIC_SELECT)
     .populate(DEFAULT_POPULATE)
     .sort({ createdAt: -1 })
     .limit(limit)
@@ -172,6 +182,7 @@ export const getFeatured = asyncHandler(async (req: Request, res: Response) => {
 export const getNewArrivals = asyncHandler(async (req: Request, res: Response) => {
   const limit = Math.min(Number(req.query.limit) || 12, 50);
   const products = await Product.find({ isActive: true, isNewArrival: true })
+    .select(PUBLIC_SELECT)
     .populate(DEFAULT_POPULATE)
     .sort({ createdAt: -1 })
     .limit(limit)
@@ -184,6 +195,7 @@ export const getNewArrivals = asyncHandler(async (req: Request, res: Response) =
 export const getBestSellers = asyncHandler(async (req: Request, res: Response) => {
   const limit = Math.min(Number(req.query.limit) || 12, 50);
   const products = await Product.find({ isActive: true, isBestSeller: true })
+    .select(PUBLIC_SELECT)
     .populate(DEFAULT_POPULATE)
     .sort({ totalSold: -1 })
     .limit(limit)
@@ -196,6 +208,7 @@ export const getBestSellers = asyncHandler(async (req: Request, res: Response) =
 export const getTrending = asyncHandler(async (req: Request, res: Response) => {
   const limit = Math.min(Number(req.query.limit) || 12, 50);
   const products = await Product.find({ isActive: true, isTrending: true })
+    .select(PUBLIC_SELECT)
     .populate(DEFAULT_POPULATE)
     .sort({ viewCount: -1 })
     .limit(limit)
@@ -207,6 +220,7 @@ export const getTrending = asyncHandler(async (req: Request, res: Response) => {
 // @route   GET /api/v1/products/:slug
 export const getProductBySlug = asyncHandler(async (req: Request, res: Response) => {
   const product = await Product.findOne({ slug: req.params.slug, isActive: true })
+    .select(PUBLIC_SELECT)
     .populate('brand')
     .populate('category')
     .populate('subcategory')
@@ -227,6 +241,7 @@ export const getProductBySlug = asyncHandler(async (req: Request, res: Response)
 // @route   GET /api/v1/products/id/:id
 export const getProductById = asyncHandler(async (req: Request, res: Response) => {
   const product = await Product.findById(req.params.id)
+    .select(PUBLIC_SELECT)
     .populate('brand')
     .populate('category')
     .lean();
@@ -241,7 +256,9 @@ export const getProductById = asyncHandler(async (req: Request, res: Response) =
 // @desc    Get product by barcode
 // @route   GET /api/v1/products/barcode/:code
 export const getProductByBarcode = asyncHandler(async (req: Request, res: Response) => {
-  const product = await Product.findOne({ barcode: req.params.code }).lean();
+  const product = await Product.findOne({ barcode: req.params.code })
+    .select(PUBLIC_SELECT)
+    .lean();
   if (!product) throw new AppError('No product found with this barcode', 404);
   res.status(200).json({ success: true, data: product });
 });
@@ -323,7 +340,27 @@ export const updateVariant = asyncHandler(async (req: AuthRequest, res: Response
   const variant = product.variants.id(req.params.vid);
   if (!variant) throw new AppError('Variant not found', 404);
 
-  Object.assign(variant, req.body);
+  // Whitelist the editable fields to prevent mass assignment
+  const allowed = [
+    'name',
+    'price',
+    'salePrice',
+    'stock',
+    'sku',
+    'barcode',
+    'images',
+    'attributes',
+    'color',
+    'size',
+    'weight',
+    'dimensions',
+    'isActive',
+  ];
+  for (const key of allowed) {
+    if (key in req.body) {
+      (variant as any)[key] = req.body[key];
+    }
+  }
   await product.save();
 
   res.status(200).json({ success: true, data: product });
@@ -357,6 +394,7 @@ export const getRelatedProducts = asyncHandler(async (req: Request, res: Respons
       { tags: { $in: product.tags.slice(0, 3) } },
     ],
   })
+    .select(PUBLIC_SELECT)
     .populate(DEFAULT_POPULATE)
     .limit(8)
     .lean();

@@ -13,6 +13,7 @@ import {
 import { useGetMyOrdersQuery } from '../app/services/order'
 import { useGetWishlistsQuery, useDeleteWishlistMutation } from '../app/services/wishlist'
 import { useAddToCartMutation } from '../app/services/cart'
+import { useLogoutMutation } from '../app/services/auth'
 import { useAppSelector, useAppDispatch } from '../hooks/typed'
 import { logout } from '../store/authSlice'
 import { formatDate } from '../lib/utils'
@@ -46,9 +47,17 @@ export default function AccountPage() {
 
   const user = profileData?.data?.user || auth.user
 
+  const [logoutRemote] = useLogoutMutation()
+
   const handleLogout = async () => {
-    dispatch(logout())
-    navigate('/')
+    try {
+      await logoutRemote().unwrap()
+    } catch {
+      // Ignore network errors — still clear local session
+    } finally {
+      dispatch(logout())
+      navigate('/')
+    }
   }
 
   return (

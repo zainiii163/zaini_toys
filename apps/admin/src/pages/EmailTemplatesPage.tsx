@@ -26,7 +26,7 @@ export default function EmailTemplatesPage() {
   }
 
   const onSave = () => {
-    toast.success(`Template "${current?.name}" saved!`)
+    toast.success(`Template "${current?.name}" saved (local only)`)
     setEditingId(null)
   }
 
@@ -41,6 +41,10 @@ export default function EmailTemplatesPage() {
         <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
           <Plus className="h-4 w-4" /> Create Template
         </button>
+      </div>
+
+      <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        Coming soon — template changes are <strong>not persisted to the backend</strong> yet. Editing here is local-only preview.
       </div>
 
       <div className="grid gap-4">

@@ -6,6 +6,7 @@ import type { IUser } from '../models/User';
 export interface TokenPayload {
   id: string;
   role: string;
+  v: number;
 }
 
 const accessTokenSecret = env.JWT_SECRET;
@@ -13,16 +14,20 @@ const refreshTokenSecret = env.JWT_REFRESH_SECRET;
 const accessExpire = env.JWT_EXPIRE as any;
 const refreshExpire = env.JWT_REFRESH_EXPIRE as any;
 
-export const generateAccessToken = (user: { _id: unknown; role: string }): string => {
-  return jwt.sign({ id: user._id, role: user.role }, accessTokenSecret, {
-    expiresIn: accessExpire,
-  } as jwt.SignOptions);
+export const generateAccessToken = (user: { _id: unknown; role: string; tokenVersion?: number }): string => {
+  return jwt.sign(
+    { id: user._id, role: user.role, v: user.tokenVersion ?? 0 },
+    accessTokenSecret,
+    { expiresIn: accessExpire } as jwt.SignOptions,
+  );
 };
 
-export const generateRefreshToken = (user: { _id: unknown; role: string }): string => {
-  return jwt.sign({ id: user._id, role: user.role }, refreshTokenSecret, {
-    expiresIn: refreshExpire,
-  } as jwt.SignOptions);
+export const generateRefreshToken = (user: { _id: unknown; role: string; tokenVersion?: number }): string => {
+  return jwt.sign(
+    { id: user._id, role: user.role, v: user.tokenVersion ?? 0 },
+    refreshTokenSecret,
+    { expiresIn: refreshExpire } as jwt.SignOptions,
+  );
 };
 
 export const verifyAccessToken = (token: string): TokenPayload => {

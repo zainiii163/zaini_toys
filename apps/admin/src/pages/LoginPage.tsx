@@ -4,6 +4,7 @@ import { Lock, Mail } from 'lucide-react'
 import { useLoginMutation } from '../app/services/auth'
 import { useAppDispatch } from '../hooks/typed'
 import { setUser, setBootstrapDone } from '../store/authSlice'
+import { isStaffRole } from '../lib/permissions'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -19,7 +20,7 @@ export default function LoginPage() {
     try {
       const res = await login({ email, password }).unwrap()
       const user = res.data.user
-      if (user.role !== 'admin' && user.role !== 'staff') {
+      if (!isStaffRole(user.role)) {
         setError('Access denied. Admin/staff only.')
         return
       }

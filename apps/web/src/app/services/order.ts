@@ -80,6 +80,9 @@ export const orderApi = api.injectEndpoints({
       query: (orderNumber) => `/orders/${orderNumber}`,
       providesTags: ['Orders'],
     }),
+    publicTrackOrder: builder.query<ApiResponse<Order>, string>({
+      query: (orderNumber) => `/orders/public/${orderNumber}/track`,
+    }),
     createOrder: builder.mutation<ApiResponse<Order>, CreateOrderRequest>({
       query: (body) => ({ url: '/orders', method: 'POST', body }),
       invalidatesTags: ['Orders', 'Cart', 'Products'],
@@ -98,6 +101,7 @@ export const orderApi = api.injectEndpoints({
 export const {
   useGetMyOrdersQuery,
   useGetOrderByNumberQuery,
+  usePublicTrackOrderQuery,
   useCreateOrderMutation,
   useCancelOrderMutation,
   useReorderMutation,

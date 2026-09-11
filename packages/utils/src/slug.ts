@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export function generateSlug(text: string): string {
   return text
     .toLowerCase()
@@ -20,7 +22,9 @@ export function generateOrderNumber(date: Date = new Date()): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  const random = Math.floor(1000 + Math.random() * 9000);
+  // High-entropy suffix (7 digits, ~9M possibilities per day) to prevent
+  // order-number guessing/enumeration.
+  const random = crypto.randomInt(1000000, 10000000);
   return `TOY-${year}${month}${day}-${random}`;
 }
 

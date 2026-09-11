@@ -36,7 +36,7 @@ export const authApi = api.injectEndpoints({
     sendOtp: builder.mutation<ApiResponse<null>, { phone: string; purpose: string }>({
       query: (body) => ({ url: '/auth/send-otp', method: 'POST', body }),
     }),
-    verifyOtp: builder.mutation<ApiResponse<null>, { phone: string; otp: string; purpose: string }>({
+    verifyOtp: builder.mutation<AuthResponse | ApiResponse<null>, { phone: string; otp: string; purpose: string }>({
       query: (body) => ({ url: '/auth/verify-otp', method: 'POST', body }),
     }),
     forgotPassword: builder.mutation<ApiResponse<null>, { email: string }>({

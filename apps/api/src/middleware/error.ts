@@ -52,10 +52,22 @@ export const globalErrorHandler = (
   if (err.code === 'LIMIT_FILE_SIZE') {
     error = new AppError('File too large. Max size is 10MB.', 400);
   }
+  if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+    error = new AppError('Unexpected file field.', 400);
+  }
 
-  res.status(error.statusCode || 500).json({
+  const statusCode = error.statusCode || 500;
+
+  // Never leak internal error details for unhandled 500s
+  const isProduction = process.env.NODE_ENV === 'production';
+  const message =
+    statusCode === 500 && !error.isOperational && isProduction
+      ? 'Something went wrong. Please try again later.'
+      : (error.message || 'Server Error');
+
+  res.status(statusCode).json({
     success: false,
-    error: error.message || 'Server Error',
-    stack: process.env.NODE_ENV === 'production' ? undefined : error.stack,
+    error: message,
+    stack: isProduction ? undefined : error.stack,
   });
 };

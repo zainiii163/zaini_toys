@@ -3,6 +3,15 @@ import { Search, Clock, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const POPULAR_SEARCHES = ['Lego', 'Remote control car', 'Dolls', 'STEM kit', 'Board games', 'Outdoor toys']
+const API_BASE = import.meta.env.VITE_API_URL || '/api/v1'
+
+function highlight(text: string, query: string): React.ReactNode {
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const parts = text.split(new RegExp(`(${escaped})`, 'gi'))
+  return parts.map((part, i) =>
+    part.toLowerCase() === query.toLowerCase() ? <b key={i}>{part}</b> : part,
+  )
+}
 
 export default function SearchAutocomplete() {
   const navigate = useNavigate()
@@ -24,7 +33,7 @@ export default function SearchAutocomplete() {
     if (query.length < 2) { setSuggestions([]); return }
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/v1/search/suggestions?q=${encodeURIComponent(query)}`).then((r) => r.json())
+        const res = await fetch(`${API_BASE}/search/suggestions?q=${encodeURIComponent(query)}`).then((r) => r.json())
         setSuggestions(res.data || [])
       } catch { setSuggestions([]) }
     }, 300)
@@ -92,7 +101,7 @@ export default function SearchAutocomplete() {
               {suggestions.map((s) => (
                 <button key={s} onClick={() => onSearch(s)} className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-gray-50">
                   <Search className="h-3.5 w-3.5 text-gray-400" />
-                  <span dangerouslySetInnerHTML={{ __html: s.replace(new RegExp(`(${query})`, 'gi'), '<b>$1</b>') }} />
+                  <span className="min-w-0 flex-1 truncate text-left">{highlight(s, query)}</span>
                 </button>
               ))}
             </div>

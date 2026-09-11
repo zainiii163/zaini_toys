@@ -6,6 +6,7 @@ import {
   updateCoupon,
   deleteCoupon,
   getCouponStats,
+  adminCouponStats,
 } from '../controllers/coupon.controller';
 import { authenticate, optionalAuth, authorize } from '../middleware/auth';
 import { validate } from '../middleware/validation';
@@ -18,6 +19,7 @@ router.post('/validate', optionalAuth, validate(applyCouponSchema), validateCoup
 router.use(authenticate);
 
 router.get('/', authorize('admin', 'marketing', 'manager'), getCoupons);
+router.get('/admin/stats', authorize('admin', 'marketing', 'manager'), adminCouponStats);
 router.post('/', authorize('admin', 'marketing', 'manager'), validate(createCouponSchema), createCoupon);
 router.put('/:id', authorize('admin', 'marketing', 'manager'), validate(createCouponSchema.partial()), updateCoupon);
 router.delete('/:id', authorize('admin', 'marketing', 'manager'), deleteCoupon);

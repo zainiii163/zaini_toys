@@ -1,15 +1,48 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-primary: #2563eb;
-  --color-primary-dark: #1d4ed8;
-  --color-accent: #f59e0b;
+  /* ── Brand teal ─────────────────────────────────────────────
+     The blue-* scale is remapped to our brand teal so every
+     existing bg-blue-600 / text-blue-50 / ring-blue-100 utility
+     becomes a brand color automatically. */
+  --color-blue-50: #f0fdfa;
+  --color-blue-100: #ccfbf1;
+  --color-blue-200: #99f6e4;
+  --color-blue-300: #5eead4;
+  --color-blue-400: #2dd4bf;
+  --color-blue-500: #14b8a6;
+  --color-blue-600: #0d9488;
+  --color-blue-700: #0f766e;
+  --color-blue-800: #115e59;
+  --color-blue-900: #134e4a;
+  --color-blue-950: #042f2e;
+
+  /* ── Nectarine accent ─────────────────────────────────────── */
+  --color-nectarine: #fb923c;
+  --color-nectarine-dark: #ea580c;
+  --color-nectarine-soft: #ffedd5;
+
+  /* ── Semantic tokens ──────────────────────────────────────── */
+  --color-primary: #0d9488;
+  --color-primary-dark: #0f766e;
+  --color-accent: #fb923c;
+  --color-accent-dark: #ea580c;
   --color-toy-pink: #f472b6;
   --color-toy-teal: #14b8a6;
   --color-ink: #1f2937;
   --color-paper: #ffffff;
+
   --font-sans: 'Poppins', system-ui, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Fredoka', 'Poppins', system-ui, sans-serif;
+}
+
+/* Rotating announcement fade */
+@keyframes announce {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.announce-fade {
+  animation: announce 0.45s ease both;
 }
 
 html {
@@ -20,7 +53,7 @@ html {
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background-color: #f9fafb;
+  background-color: #faf9f6;
   color: var(--color-ink);
 }
 
@@ -35,13 +68,13 @@ h1, h2, h3, h4 {
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-secondary {
     @apply inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50;
   }
   .input-toy {
-    @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100;
+    @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-blue-100;
   }
   .label-toy {
     @apply mb-1 block text-sm font-medium text-gray-700;

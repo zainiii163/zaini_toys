@@ -48,8 +48,7 @@ export interface IUser extends Document {
   resetPasswordExpire?: Date;
   emailVerificationToken?: string;
   emailVerificationExpire?: Date;
-  phoneOtp?: string;
-  phoneOtpExpire?: Date;
+  tokenVersion: number;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidate: string): Promise<boolean>;
@@ -131,15 +130,13 @@ const userSchema = new Schema<IUser>(
     resetPasswordExpire: Date,
     emailVerificationToken: String,
     emailVerificationExpire: Date,
-    phoneOtp: { type: String, select: false },
-    phoneOtpExpire: Date,
+    tokenVersion: { type: Number, default: 0 },
   },
   {
     timestamps: true,
     toJSON: {
       transform: (_doc, ret: Record<string, unknown>) => {
         delete ret.password;
-        delete ret.phoneOtp;
         delete ret.resetPasswordToken;
         delete ret.resetPasswordExpire;
         return ret;

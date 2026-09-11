@@ -20,7 +20,7 @@ export interface NewsletterStats {
 export const newsletterApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getNewsletters: builder.query<{ data: NewsletterSubscriber[]; pagination: any }, { limit?: number }>({
-      query: (params) => ({ url: '/newsletter', params }),
+      query: (params) => ({ url: '/newsletter/admin/all', params }),
       providesTags: ['Newsletters'],
     }),
     updateNewsletterStatus: builder.mutation<{ success: boolean }, { id: string; body: { isSubscribed: boolean } }>({

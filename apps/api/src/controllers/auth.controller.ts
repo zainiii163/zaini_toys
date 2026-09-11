@@ -4,6 +4,7 @@ import { User } from '../models/User';
 import { AppError } from '../utils/AppError';
 import { asyncHandler } from '../utils/asyncHandler';
 import { sendTokens, generateRefreshToken, verifyRefreshToken } from '../utils/token';
+import { storeOtp, verifyOtpCode } from '../services/otp.service';
 import { emailService } from '../services/email.service';
 import type { AuthRequest } from '../middleware/auth';
 
@@ -57,7 +58,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email }).select('+password +phoneOtp');
+  const user = await User.findOne({ email }).select('+password');
   if (!user || !(await user.comparePassword(password))) {
     throw new AppError('Invalid email or password', 401);
   }
@@ -89,76 +90,71 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
 // @desc    Send OTP to phone
 // @route   POST /api/v1/auth/send-otp
+// Security: no account enumeration (identical response whether or not the
+// phone exists) and no auto-registration of junk user records.
 export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
   const { phone, purpose } = req.body;
 
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiry = new Date(Date.now() + 10 * 60 * 1000);
-
-  let user = await User.findOne({ phone });
-
-  if (purpose === 'login' && !user) {
-    throw new AppError('No account found with this phone number. Please register.', 404);
-  }
-
-  if (purpose === 'verification' && !user) {
-    // Auto-register on first verification
-    user = await User.create({
-      name: 'User ' + phone.slice(-4),
-      phone,
-      email: `${phone.replace(/\D/g, '')}@toymail.local`,
-      password: crypto.randomBytes(16).toString('hex'),
-      referralCode: generateReferralCode(),
-    });
-  }
-
-  if (!user) {
-    throw new AppError('User not found', 404);
-  }
-
-  user.phoneOtp = otp;
-  user.phoneOtpExpire = expiry;
-  await user.save();
+  const code = await storeOtp(phone, purpose);
 
   // TODO: Integrate SMS gateway (e.g., Telenor, PTCL) to send OTP
   if (process.env.NODE_ENV === 'development') {
-    console.log(`[DEV] OTP for ${phone}: ${otp}`);
+    console.log(`[DEV] OTP for ${phone} (${purpose}): ${code}`);
   }
 
   res.status(200).json({
     success: true,
-    message: 'OTP sent successfully',
+    message: 'If an account exists with this phone number, an OTP has been sent.',
   });
 });
 
-// @desc    Verify OTP and login
+// @desc    Verify OTP (and sign in when purpose is 'login')
 // @route   POST /api/v1/auth/verify-otp
 export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
-  const { phone, otp } = req.body;
+  const { phone, otp, purpose } = req.body;
 
-  const user = await User.findOne({ phone }).select('+phoneOtp');
-  if (!user) {
-    throw new AppError('User not found', 404);
+  const valid = await verifyOtpCode(phone, purpose, otp);
+  if (!valid) {
+    throw new AppError('Invalid or expired OTP. Please request a new one.', 400);
   }
 
-  if (!user.phoneOtp || user.phoneOtp !== otp) {
-    throw new AppError('Invalid OTP', 400);
+  const user = await User.findOne({ phone }).select('-password');
+
+  if (purpose === 'login') {
+    if (!user) {
+      throw new AppError('No account found with this phone number. Please register.', 404);
+    }
+    if (user.isBlocked) throw new AppError('Your account has been blocked', 403);
+    if (!user.isActive) throw new AppError('Your account is inactive', 403);
+
+    if (!user.isPhoneVerified) {
+      user.isPhoneVerified = true;
+      await user.save();
+    }
+
+    user.lastLogin = new Date();
+    user.loginHistory.unshift({
+      ip: req.ip || '',
+      device: req.headers['user-agent']?.slice(0, 200) || '',
+      date: new Date(),
+    });
+    user.loginHistory = user.loginHistory.slice(0, 20);
+    await user.save();
+
+    sendTokens(res, user);
+    res.status(200).json({ success: true, data: { user } });
+    return;
   }
 
-  if (user.phoneOtpExpire && user.phoneOtpExpire < new Date()) {
-    throw new AppError('OTP has expired. Please request a new one.', 400);
+  // purposes: 'verification' | 'reset'
+  if (user && !user.isPhoneVerified) {
+    user.isPhoneVerified = true;
+    await user.save();
   }
-
-  user.phoneOtp = undefined;
-  user.phoneOtpExpire = undefined;
-  user.isPhoneVerified = true;
-  await user.save();
-
-  sendTokens(res, user);
 
   res.status(200).json({
     success: true,
-    data: { user },
+    message: purpose === 'reset' ? 'OTP verified. You may now reset your password.' : 'Phone number verified.',
   });
 });
 
@@ -207,6 +203,8 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
   user.password = password;
   user.resetPasswordToken = undefined;
   user.resetPasswordExpire = undefined;
+  // Invalidate any other active sessions after a password reset
+  user.tokenVersion = (user.tokenVersion || 0) + 1;
   await user.save();
 
   sendTokens(res, user);
@@ -226,10 +224,10 @@ export const getMe = asyncHandler(async (req: AuthRequest, res: Response) => {
 
 // @desc    Refresh access token
 // @route   POST /api/v1/auth/refresh-token
+// Refresh tokens are read ONLY from the httpOnly cookie (never the request
+// body) and are rotated on every use so a stolen token can't be reused.
 export const refreshToken = asyncHandler(async (req: Request, res: Response) => {
-  const refreshTokenFromBody = req.body.refreshToken;
-  const refreshTokenFromCookie = req.cookies?.refresh_token;
-  const token = refreshTokenFromBody || refreshTokenFromCookie;
+  const token = req.cookies?.refresh_token;
 
   if (!token) {
     throw new AppError('No refresh token provided', 401);
@@ -237,11 +235,22 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
 
   try {
     const decoded = verifyRefreshToken(token);
-    const user = await User.findById(decoded.id).select('-password -phoneOtp');
+    const user = await User.findById(decoded.id).select('-password');
 
     if (!user || !user.isActive) {
       throw new AppError('User no longer exists', 401);
     }
+    if (user.isBlocked) {
+      throw new AppError('Your account has been blocked', 403);
+    }
+    if (decoded.v !== (user.tokenVersion || 0)) {
+      throw new AppError('Invalid or expired refresh token', 401);
+    }
+
+    // Rotate: invalidate the current refresh token before issuing a new one
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    user.lastLogin = new Date();
+    await user.save();
 
     sendTokens(res, user);
 
@@ -256,7 +265,20 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
 
 // @desc    Logout
 // @route   POST /api/v1/auth/logout
-export const logout = asyncHandler(async (_req: Request, res: Response) => {
+// Revokes the refresh token (bumps tokenVersion) so any outstanding sessions
+// are invalidated.
+export const logout = asyncHandler(async (req: Request, res: Response) => {
+  const token = req.cookies?.refresh_token;
+  if (token) {
+    try {
+      const decoded = verifyRefreshToken(token);
+      await User.findByIdAndUpdate(decoded.id, {
+        $inc: { tokenVersion: 1 },
+      });
+    } catch {
+      // token already invalid — nothing to revoke
+    }
+  }
   res.clearCookie('access_token');
   res.clearCookie('refresh_token');
   res.status(200).json({ success: true, message: 'Logged out' });

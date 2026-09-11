@@ -113,3 +113,33 @@ export const getCouponStats = asyncHandler(async (req: AuthRequest, res: Respons
     },
   });
 });
+
+// @desc    Admin: Overall coupon statistics
+// @route   GET /api/v1/coupons/admin/stats
+export const adminCouponStats = asyncHandler(async (_req: AuthRequest, res: Response) => {
+  const now = new Date();
+  const [total, active] = await Promise.all([
+    Coupon.countDocuments(),
+    Coupon.countDocuments({ isActive: true, startDate: { $lte: now }, endDate: { $gte: now } }),
+  ]);
+
+  const topCoupons = await Coupon.find({ usageCount: { $gt: 0 } })
+    .sort({ usageCount: -1 })
+    .limit(10)
+    .select('code type value usageCount')
+    .lean();
+
+  const used = await Coupon.aggregate([
+    { $group: { _id: null, totalUsage: { $sum: '$usageCount' } } },
+  ]);
+
+  res.status(200).json({
+    success: true,
+    data: {
+      total,
+      active,
+      totalUsage: used[0]?.totalUsage || 0,
+      topCoupons,
+    },
+  });
+});

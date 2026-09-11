@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { BlogPost } from '../models/BlogPost';
 import { AppError } from '../utils/AppError';
 import { asyncHandler } from '../utils/asyncHandler';
-import { getPaginationParams, getPaginationMeta } from '@toys/utils';
+import { getPaginationParams, getPaginationMeta, escapeRegExp } from '@toys/utils';
 import type { AuthRequest } from '../middleware/auth';
 
 const generateSlug = (title: string) =>
@@ -17,7 +17,7 @@ export const getPublishedPosts = asyncHandler(async (req: Request, res: Response
   const filter: any = { isPublished: true };
   if (category) filter.category = category;
   if (tag) filter.tags = tag;
-  if (search) filter.$or = [{ title: { $regex: search, $options: 'i' } }, { excerpt: { $regex: search, $options: 'i' } }];
+  if (search) filter.$or = [{ title: { $regex: escapeRegExp(String(search)), $options: 'i' } }, { excerpt: { $regex: escapeRegExp(String(search)), $options: 'i' } }];
 
   const [posts, total] = await Promise.all([
     BlogPost.find(filter)

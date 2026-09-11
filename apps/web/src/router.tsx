@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { useEffect } from 'react'
-import { useAppDispatch } from './hooks/typed'
+import { Navigate, useLocation } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from './hooks/typed'
 import { setUser, setBootstrapDone } from './store/authSlice'
 import { useGetMeQuery } from './app/services/auth'
 
@@ -53,6 +54,17 @@ function AuthBootstrap({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  const auth = useAppSelector((s) => s.auth)
+  const location = useLocation()
+
+  if (!auth.bootstrapDone) return null
+  if (!auth.isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />
+  }
+  return <>{children}</>
+}
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -95,7 +107,11 @@ export const router = createBrowserRouter([
       { path: 'accessibility', element: <AccessibilityPage /> },
       {
         path: 'account',
-        element: <AccountPage />,
+        element: (
+          <RequireAuth>
+            <AccountPage />
+          </RequireAuth>
+        ),
         children: [
           { index: true, element: <ProfileTab /> },
           { path: 'profile', element: <ProfileTab /> },

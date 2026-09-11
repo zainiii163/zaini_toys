@@ -4,7 +4,7 @@ import { Category } from '../models/Category';
 import { Brand } from '../models/Brand';
 import { AppError } from '../utils/AppError';
 import { asyncHandler } from '../utils/asyncHandler';
-import { getPaginationParams, getPaginationMeta } from '@toys/utils';
+import { getPaginationParams, getPaginationMeta, escapeRegExp } from '@toys/utils';
 import type { AuthRequest } from '../middleware/auth';
 import { SearchHistory } from '../models/SearchHistory';
 
@@ -94,11 +94,11 @@ export const getSuggestions = asyncHandler(async (req: Request, res: Response) =
       .sort({ score: { $meta: 'textScore' } })
       .limit(6)
       .lean(),
-    Category.find({ isActive: true, name: { $regex: q, $options: 'i' } })
+    Category.find({ isActive: true, name: { $regex: escapeRegExp(String(q)), $options: 'i' } })
       .select('name slug image')
       .limit(4)
       .lean(),
-    Brand.find({ isActive: true, name: { $regex: q, $options: 'i' } })
+    Brand.find({ isActive: true, name: { $regex: escapeRegExp(String(q)), $options: 'i' } })
       .select('name slug logo')
       .limit(3)
       .lean(),
@@ -147,7 +147,7 @@ export const searchByCode = asyncHandler(async (req: Request, res: Response) => 
   if (!code) throw new AppError('Code is required', 400);
 
   const product = await Product.findOne({
-    $or: [{ sku: { $regex: `^${code}$`, $options: 'i' } }, { barcode: code }],
+    $or: [{ sku: { $regex: `^${escapeRegExp(String(code))}$`, $options: 'i' } }, { barcode: code }],
     isActive: true,
   }).populate('brand')
     .populate('category')

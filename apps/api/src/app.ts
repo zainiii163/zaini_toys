@@ -39,20 +39,22 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
-// CORS
+// CORS — exact origin allow-list only (no wildcard subdomain matching).
+// Requests without an Origin header (curl, server-to-server webhooks) are allowed.
 const isProd = process.env.NODE_ENV === 'production';
 const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:5174')
   .split(',')
-  .map((o) => o.trim());
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+if (!isProd) {
+  allowedOrigins.push('http://localhost:5173', 'http://localhost:5174');
+}
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        (isProd && origin && origin.endsWith('.vercel.app'))
-      ) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new AppError('Not allowed by CORS', 403));
@@ -63,7 +65,17 @@ app.use(
 );
 
 // Body parsing
-app.use(express.json({ limit: '5mb' }));
+app.use(
+  express.json({
+    limit: '5mb',
+    verify: (req, _res, buf) => {
+      // Preserve the raw body for payment webhook signature verification
+      if (String(req.url || '').includes('/payments/webhook')) {
+        (req as any).rawBody = buf;
+      }
+    },
+  }),
+);
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 app.use(cookieParser());
 

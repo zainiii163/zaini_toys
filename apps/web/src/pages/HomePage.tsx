@@ -1,5 +1,6 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronRight, Truck, ShieldCheck, CreditCard, Gift, Baby, Blocks, Puzzle, Rocket, Star, Gamepad2 } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Truck, ShieldCheck, CreditCard, Gift } from 'lucide-react'
 import { useGetBannersQuery, useGetFlashSaleQuery } from '../app/services/banner'
 import {
   useGetFeaturedProductsQuery,
@@ -16,14 +17,25 @@ import TestimonialSection from '../components/TestimonialSection'
 import NewsletterSection from '../components/NewsletterSection'
 import RecentlyViewed from '../components/RecentlyViewed'
 import SEO from '../components/SEO'
+import { BUDGET_RANGES, LITTLE_ONES, SEO_TEXT } from '../config/site'
+import type { LittleOne } from '../config/site'
 
-const AGE_SECTIONS = [
-  { label: '0–12 Months', icon: Baby, ageMin: 0, ageMax: 1, color: 'bg-pink-50 text-pink-600', emoji: '👶' },
-  { label: '1–3 Years', icon: Blocks, ageMin: 1, ageMax: 3, color: 'bg-purple-50 text-purple-600', emoji: '🧒' },
-  { label: '3–6 Years', icon: Puzzle, ageMin: 3, ageMax: 6, color: 'bg-blue-50 text-blue-600', emoji: '🎨' },
-  { label: '6–9 Years', icon: Rocket, ageMin: 6, ageMax: 9, color: 'bg-teal-50 text-teal-600', emoji: '🚀' },
-  { label: '9–12 Years', icon: Star, ageMin: 9, ageMax: 12, color: 'bg-amber-50 text-amber-600', emoji: '⭐' },
-  { label: '12+ Years', icon: Gamepad2, ageMin: 12, ageMax: 99, color: 'bg-red-50 text-red-600', emoji: '🎮' },
+const budgetUrl = (b: { max: number }) => `/shop?maxPrice=${b.max}`
+const littleOneUrl = (l: LittleOne) =>
+  l.gender ? `/shop?gender=${l.gender}` : `/shop?ageMin=${l.ageMin}`
+
+const BUDGET_TILES = [
+  'from-orange-50 to-amber-50',
+  'from-teal-50 to-cyan-50',
+  'from-pink-50 to-rose-50',
+  'from-violet-50 to-purple-50',
+]
+
+const TRUST_BADGES = [
+  { icon: Truck, title: 'Free Delivery', desc: 'Orders over Rs. 3,000', color: 'text-primary' },
+  { icon: ShieldCheck, title: '100% Authentic', desc: 'Certified safe toys', color: 'text-emerald-600' },
+  { icon: CreditCard, title: 'Secure Payment', desc: 'COD & online cards', color: 'text-nectarine' },
+  { icon: Gift, title: '7-Day Returns', desc: 'Easy return policy', color: 'text-pink-500' },
 ]
 
 export default function HomePage() {
@@ -37,14 +49,34 @@ export default function HomePage() {
 
   const banners = bannersData?.success ? bannersData.data : []
   const flashItems = flashSaleData?.success ? flashSaleData.data?.products ?? [] : []
-  const categories = categoriesData?.success ? categoriesData.data?.slice(0, 8) ?? [] : []
+  const allCategories = categoriesData?.success ? categoriesData.data ?? [] : []
+  const categories = allCategories.slice(0, 8)
   const featuredProducts = featuredData?.success ? featuredData.data : []
   const newArrivals = newArrivalsData?.success ? newArrivalsData.data : []
   const bestSellers = bestSellersData?.success ? bestSellersData.data : []
   const brands = brandsData?.success ? brandsData.data ?? [] : []
 
-  const hero = banners.find((b) => b.position === 'hero')
+  const heroBanners = banners.filter((b) => b.position === 'hero')
   const flashSale = flashSaleData?.success ? flashSaleData.data : null
+
+  const [heroIdx, setHeroIdx] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (heroBanners.length <= 1) return
+    const t = setInterval(() => setHeroIdx((i) => (i + 1) % heroBanners.length), 6000)
+    return () => clearInterval(t)
+  }, [heroBanners.length])
+
+  const activeHero = heroBanners[heroIdx % Math.max(heroBanners.length, 1)]
+  const heroTitle = activeHero?.title ?? 'Fun, Safe Toys for Every Kid'
+  const heroSubtitle =
+    activeHero?.subtitle ?? 'Educational, exciting, and age-appropriate toys delivered across Pakistan.'
+  const heroLink = activeHero?.link ?? '/shop'
+
+  const scrollCategories = (dir: number) => {
+    scrollRef.current?.scrollBy({ left: dir * 300, behavior: 'smooth' })
+  }
 
   return (
     <div>
@@ -53,45 +85,62 @@ export default function HomePage() {
         description="Pakistan's #1 online toy store. Educational, exciting, and age-appropriate toys with free delivery over Rs. 3,000."
         keywords="toys Pakistan, online toys, educational toys, kids toys, baby toys, LEGO, remote control cars"
       />
-      {/* Hero Banner */}
-      <section className="relative">
-        {hero ? (
-          <div className="relative h-[420px] w-full overflow-hidden bg-blue-600">
-            <img src={hero.image.url} alt={hero.title} className="h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
-            <div className="container-toy relative flex h-full flex-col justify-center">
-              <h1 className="max-w-xl font-display text-4xl font-bold text-white sm:text-5xl">{hero.title}</h1>
-              {hero.subtitle && <p className="mt-3 max-w-lg text-lg text-gray-200">{hero.subtitle}</p>}
-              <Link to="/shop" className="btn-primary mt-6 w-fit bg-white !text-blue-700 hover:bg-gray-100">
-                Shop Now <ChevronRight className="ml-1 h-4 w-4" />
-              </Link>
+
+      {/* Hero carousel */}
+      <section className="relative overflow-hidden bg-primary">
+        <div className="relative h-[380px] w-full sm:h-[440px]">
+          {heroBanners.map((b, i) => (
+            <div
+              key={b._id}
+              className={`absolute inset-0 transition-opacity duration-700 ${i === heroIdx ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+            >
+              <img src={b.image.url} alt={b.title} className="h-full w-full object-cover" />
             </div>
+          ))}
+          {heroBanners.length > 0 && (
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-950/70 via-blue-900/40 to-transparent" />
+          )}
+          <div className="container-toy relative flex h-full flex-col justify-center">
+            <h1 className="max-w-xl font-display text-4xl font-bold text-white sm:text-5xl">{heroTitle}</h1>
+            <p className="mt-3 max-w-lg text-lg text-blue-100">{heroSubtitle}</p>
+            <Link to={heroLink} className="btn-primary mt-6 w-fit bg-white !text-primary-dark hover:bg-gray-100">
+              Shop Now <ChevronRight className="ml-1 h-4 w-4" />
+            </Link>
           </div>
-        ) : (
-          <div className="bg-gradient-to-r from-blue-600 to-teal-500 py-16">
-            <div className="container-toy">
-              <h1 className="font-display text-4xl font-bold text-white sm:text-5xl">
-                Fun, Safe Toys for Every Kid
-              </h1>
-              <p className="mt-3 max-w-lg text-lg text-blue-100">
-                Educational, exciting, and age-appropriate toys delivered across Pakistan.
-              </p>
-              <Link to="/shop" className="btn-primary mt-6 w-fit bg-white !text-blue-700 hover:bg-gray-100">
-                Shop Now <ChevronRight className="ml-1 h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        )}
+          {heroBanners.length > 1 && (
+            <>
+              <button
+                onClick={() => setHeroIdx((heroIdx - 1 + heroBanners.length) % heroBanners.length)}
+                className="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-white/80 p-2 text-gray-700 shadow hover:bg-white sm:block"
+                aria-label="Previous banner"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => setHeroIdx((heroIdx + 1) % heroBanners.length)}
+                className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-white/80 p-2 text-gray-700 shadow hover:bg-white sm:block"
+                aria-label="Next banner"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+              <div className="absolute inset-x-0 bottom-4 z-10 flex justify-center gap-2">
+                {heroBanners.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setHeroIdx(i)}
+                    className={`h-2 rounded-full transition-all ${i === heroIdx ? 'w-6 bg-white' : 'w-2 bg-white/50'}`}
+                    aria-label={`Go to banner ${i + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </section>
 
       {/* Trust badges */}
       <section className="container-toy grid gap-4 py-8 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { icon: Truck, title: 'Free Delivery', desc: 'Orders over Rs. 3,000', color: 'text-blue-600' },
-          { icon: ShieldCheck, title: '100% Authentic', desc: 'Certified safe toys', color: 'text-emerald-600' },
-          { icon: CreditCard, title: 'Secure Payment', desc: 'COD & online cards', color: 'text-amber-500' },
-          { icon: Gift, title: '7-Day Returns', desc: 'Easy return policy', color: 'text-pink-500' },
-        ].map(({ icon: Icon, title, desc, color }) => (
+        {TRUST_BADGES.map(({ icon: Icon, title, desc, color }) => (
           <div key={title} className="card-toy flex items-center gap-3 p-4">
             <Icon className={`h-8 w-8 ${color}`} />
             <div>
@@ -102,20 +151,70 @@ export default function HomePage() {
         ))}
       </section>
 
-      {/* Shop by Age */}
+      {/* Top Selling Categories */}
       <section className="container-toy py-8">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-2xl font-semibold">Shop by Age</h2>
+          <h2 className="font-display text-2xl font-semibold">Top Selling Categories</h2>
+          <Link to="/shop" className="text-sm font-medium text-primary hover:underline">View all</Link>
         </div>
-        <div className="grid grid-cols-3 gap-4 sm:grid-cols-6">
-          {AGE_SECTIONS.map((ag) => (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {categories.map((cat, idx) => (
             <Link
-              key={ag.label}
-              to={`/shop?ageMin=${ag.ageMin}&ageMax=${ag.ageMax}`}
-              className={`card-toy flex flex-col items-center p-4 text-center transition-all hover:scale-105 hover:shadow-md ${ag.color}`}
+              key={cat._id}
+              to={`/shop?category=${cat.slug}`}
+              className="card-toy group relative flex flex-col items-center p-4 text-center transition-shadow hover:shadow-md"
             >
-              <span className="text-3xl">{ag.emoji}</span>
-              <p className="mt-2 text-xs font-semibold sm:text-sm">{ag.label}</p>
+              <span
+                className={`absolute left-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-bold text-white ${idx % 2 === 0 ? 'bg-red-500' : 'bg-primary'}`}
+              >
+                {idx % 2 === 0 ? 'HOT' : 'NEW'}
+              </span>
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-2xl">
+                {cat.image ? (
+                  <img src={cat.image} alt={cat.name} className="h-12 w-12 rounded-full object-cover" />
+                ) : (
+                  <span>{cat.icon || '🧸'}</span>
+                )}
+              </div>
+              <p className="mt-2 text-sm font-medium text-gray-800 group-hover:text-primary">{cat.name}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Shop for Little Ones */}
+      <section className="container-toy py-8">
+        <h2 className="mb-4 font-display text-2xl font-semibold">Shop for Little Ones</h2>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {LITTLE_ONES.map((l) => (
+            <Link
+              key={l.label}
+              to={littleOneUrl(l)}
+              className={`card-toy group flex flex-col items-center justify-center gap-2 bg-gradient-to-br ${l.tile} p-8 text-center transition-shadow hover:shadow-md`}
+            >
+              <span className="text-5xl transition-transform group-hover:scale-110">{l.emoji}</span>
+              <p className="font-display text-lg font-semibold text-gray-800">{l.label}</p>
+              <span className="text-xs font-medium text-gray-500 group-hover:text-primary">Shop now →</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Shop by Budget */}
+      <section className="container-toy py-8">
+        <h2 className="mb-4 font-display text-2xl font-semibold">Shop by Budget</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {BUDGET_RANGES.map((b, idx) => (
+            <Link
+              key={b.label}
+              to={budgetUrl(b)}
+              className={`card-toy group flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-br p-5 transition-shadow hover:shadow-md ${BUDGET_TILES[idx % BUDGET_TILES.length]}`}
+            >
+              <div>
+                <p className="font-display text-lg font-semibold text-gray-800">{b.label}</p>
+                <span className="text-xs text-gray-500 group-hover:text-orange-600">Explore →</span>
+              </div>
+              <span className="text-3xl">{b.emoji}</span>
             </Link>
           ))}
         </div>
@@ -150,37 +249,47 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Categories */}
-      <section className="container-toy py-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-2xl font-semibold">Shop by Category</h2>
-          <Link to="/shop" className="text-sm font-medium text-blue-600 hover:underline">View all</Link>
-        </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {categories.map((cat) => (
-            <Link
-              key={cat._id}
-              to={`/shop?category=${cat.slug}`}
-              className="card-toy group flex flex-col items-center p-4 text-center transition-shadow hover:shadow-md"
-            >
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-2xl">
-                {cat.image ? (
-                  <img src={cat.image} alt={cat.name} className="h-12 w-12 rounded-full object-cover" />
-                ) : (
-                  '🧸'
-                )}
-              </div>
-              <p className="mt-2 text-sm font-medium text-gray-800 group-hover:text-blue-600">{cat.name}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {/* Popular Categories - horizontal scroll */}
+      {allCategories.length > 0 && (
+        <section className="container-toy py-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-2xl font-semibold">Our Popular Categories</h2>
+            <div className="flex items-center gap-2">
+              <Link to="/shop" className="mr-2 text-sm font-medium text-primary hover:underline">View all</Link>
+              <button onClick={() => scrollCategories(-1)} className="rounded-full border border-gray-200 bg-white p-1.5 text-gray-600 hover:bg-gray-50" aria-label="Scroll left">
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button onClick={() => scrollCategories(1)} className="rounded-full border border-gray-200 bg-white p-1.5 text-gray-600 hover:bg-gray-50" aria-label="Scroll right">
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-2">
+            {allCategories.map((cat) => (
+              <Link
+                key={cat._id}
+                to={`/shop?category=${cat.slug}`}
+                className="flex w-32 shrink-0 flex-col items-center gap-2 rounded-2xl border border-gray-200 bg-white p-3 text-center shadow-sm transition-shadow hover:shadow-md"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-xl">
+                  {cat.image ? (
+                    <img src={cat.image} alt={cat.name} className="h-10 w-10 rounded-full object-cover" />
+                  ) : (
+                    <span>{cat.icon || '🧸'}</span>
+                  )}
+                </div>
+                <p className="line-clamp-2 text-xs font-medium text-gray-700">{cat.name}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Featured Products */}
       <section className="container-toy py-8">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-2xl font-semibold">Featured Toys</h2>
-          <Link to="/shop?featured=true" className="text-sm font-medium text-blue-600 hover:underline">View all</Link>
+          <Link to="/shop?featured=true" className="text-sm font-medium text-primary hover:underline">View all</Link>
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {featuredLoading
@@ -203,7 +312,7 @@ export default function HomePage() {
         <div className="container-toy">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-display text-2xl font-semibold">New Arrivals</h2>
-            <Link to="/shop?newArrival=true" className="text-sm font-medium text-blue-600 hover:underline">View all</Link>
+            <Link to="/shop?newArrival=true" className="text-sm font-medium text-primary hover:underline">View all</Link>
           </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {newLoading
@@ -217,7 +326,7 @@ export default function HomePage() {
       <section className="container-toy py-8">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-2xl font-semibold">Best Sellers</h2>
-          <Link to="/shop?bestSeller=true" className="text-sm font-medium text-blue-600 hover:underline">View all</Link>
+          <Link to="/shop?bestSeller=true" className="text-sm font-medium text-primary hover:underline">View all</Link>
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {bestLoading
@@ -232,7 +341,7 @@ export default function HomePage() {
           <div className="container-toy">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="font-display text-2xl font-semibold">Popular Brands</h2>
-              <Link to="/shop" className="text-sm font-medium text-blue-600 hover:underline">View all</Link>
+              <Link to="/shop" className="text-sm font-medium text-primary hover:underline">View all</Link>
             </div>
             <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-6">
               {brands.slice(0, 6).map((brand) => (
@@ -258,15 +367,25 @@ export default function HomePage() {
 
       {/* Educational Toys CTA */}
       <section className="container-toy py-8">
-        <div className="card-toy overflow-hidden bg-gradient-to-r from-teal-500 to-blue-600 p-8 text-white">
+        <div className="card-toy overflow-hidden bg-gradient-to-r from-teal-500 to-primary p-8 text-white">
           <div className="flex flex-col items-center text-center">
             <span className="text-4xl">🧠</span>
             <h2 className="mt-3 font-display text-2xl font-bold">Educational Toys</h2>
             <p className="mt-2 max-w-md text-blue-100">Toys that develop STEM skills, creativity, problem solving, and motor skills. Perfect for learning through play.</p>
-            <Link to="/shop?category=educational" className="btn-primary mt-4 bg-white !text-blue-700 hover:bg-gray-100">
+            <Link to="/shop?category=educational" className="btn-primary mt-4 bg-white !text-primary-dark hover:bg-gray-100">
               Explore Educational Toys
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* SEO text */}
+      <section className="bg-white py-10">
+        <div className="container-toy mx-auto max-w-3xl text-center text-sm leading-relaxed text-gray-600">
+          <h2 className="font-display text-xl font-semibold text-gray-900">{SEO_TEXT.title}</h2>
+          {SEO_TEXT.paragraphs.map((p, i) => (
+            <p key={i} className="mt-3">{p}</p>
+          ))}
         </div>
       </section>
 

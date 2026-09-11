@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Mail, CheckCircle, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api/v1'
+
 export default function NewsletterSection() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -12,7 +14,7 @@ export default function NewsletterSection() {
     if (!email) return
     setLoading(true)
     try {
-      const res = await fetch('/api/v1/newsletter', {
+      const res = await fetch(`${API_BASE}/newsletter`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

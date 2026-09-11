@@ -1,11 +1,20 @@
 import { Link, useParams } from 'react-router-dom'
 import { CheckCircle, Truck, Clock } from 'lucide-react'
-import { useGetOrderByNumberQuery } from '../app/services/order'
+import { useGetOrderByNumberQuery, usePublicTrackOrderQuery } from '../app/services/order'
+import { useAppSelector } from '../hooks/typed'
 import { formatDate } from '../lib/utils'
 
 export default function OrderSuccessPage() {
   const { orderNumber } = useParams<{ orderNumber: string }>()
-  const { data: orderData, isLoading } = useGetOrderByNumberQuery(orderNumber || '', { skip: !orderNumber })
+  const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated)
+  const authedQuery = useGetOrderByNumberQuery(orderNumber || '', {
+    skip: !orderNumber || !isAuthenticated,
+  })
+  const publicQuery = usePublicTrackOrderQuery(orderNumber || '', {
+    skip: !orderNumber || isAuthenticated,
+  })
+  const orderData = isAuthenticated ? authedQuery : publicQuery
+  const isLoading = orderData.isLoading || !orderData.data
 
   if (isLoading) {
     return (
@@ -23,11 +32,11 @@ export default function OrderSuccessPage() {
       </div>
     )
   }
-  if (!orderData?.success || !orderData.data) {
+  if (!orderData.data?.success || !orderData.data.data) {
     return <div className="container-toy py-20 text-center">Order not found</div>
   }
 
-  const order = orderData.data
+  const order = orderData.data.data
 
   return (
     <div className="container-toy py-12">
@@ -36,7 +45,9 @@ export default function OrderSuccessPage() {
           <CheckCircle className="h-12 w-12 text-green-600" />
         </div>
         <h1 className="font-display text-3xl font-bold text-gray-900">Order Confirmed!</h1>
-        <p className="mt-2 text-lg text-gray-600">Thank you for your order, {order.customerInfo.name}.</p>
+        {order.customerInfo?.name && (
+          <p className="mt-2 text-lg text-gray-600">Thank you for your order, {order.customerInfo.name}.</p>
+        )}
         <p className="mt-1 text-blue-600 font-medium">Order #{order.orderNumber}</p>
       </div>
 
@@ -52,17 +63,19 @@ export default function OrderSuccessPage() {
             </div>
           </div>
         </Link>
-        <Link to="/account/orders" className="card-toy p-4 text-left hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
-              <Clock className="h-5 w-5 text-emerald-600" />
+        {isAuthenticated && (
+          <Link to="/account/orders" className="card-toy p-4 text-left hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                <Clock className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="font-medium">Order History</p>
+                <p className="text-sm text-gray-500">View all past orders</p>
+              </div>
             </div>
-            <div>
-              <p className="font-medium">Order History</p>
-              <p className="text-sm text-gray-500">View all past orders</p>
-            </div>
-          </div>
-        </Link>
+          </Link>
+        )}
       </div>
 
       <div className="mt-8 max-w-2xl mx-auto">
@@ -75,52 +88,67 @@ export default function OrderSuccessPage() {
               <span>Order Date</span>
               <span className="font-medium">{formatDate(order.createdAt)}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span>Shipping</span>
-              <span className="font-medium">
-                {order.shippingMethod === 'standard' ? 'Standard (3-5 days)' : order.shippingMethod === 'express' ? 'Express (1-2 days)' : 'Same Day'}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>Payment</span>
-              <span className="font-medium">
-                {order.paymentMethod === 'cod' ? 'Cash on Delivery' : order.paymentMethod.charAt(0).toUpperCase() + order.paymentMethod.slice(1)}
-              </span>
-            </div>
-            <hr />
-            <div className="flex justify-between text-lg font-bold">
-              <span>Total Paid</span>
-              <span>Rs. {order.total.toLocaleString()}</span>
-            </div>
+            {order.shippingMethod && (
+              <div className="flex justify-between text-sm">
+                <span>Shipping</span>
+                <span className="font-medium">
+                  {order.shippingMethod === 'standard' ? 'Standard (3-5 days)' : order.shippingMethod === 'express' ? 'Express (1-2 days)' : 'Same Day'}
+                </span>
+              </div>
+            )}
+            {order.paymentMethod && (
+              <div className="flex justify-between text-sm">
+                <span>Payment</span>
+                <span className="font-medium">
+                  {order.paymentMethod === 'cod' ? 'Cash on Delivery' : order.paymentMethod.charAt(0).toUpperCase() + order.paymentMethod.slice(1)}
+                </span>
+              </div>
+            )}
+            {typeof order.total === 'number' && (
+              <>
+                <hr />
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Total Paid</span>
+                  <span>Rs. {order.total.toLocaleString()}</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        <div className="mt-4 card-toy p-6">
-          <h3 className="font-semibold mb-3">Shipping Address</h3>
-          <address className="text-sm text-gray-700 not-italic">
-            {order.shippingAddress.fullName}<br />
-            {order.shippingAddress.address}<br />
-            {order.shippingAddress.area}, {order.shippingAddress.city}<br />
-            {order.shippingAddress.postalCode}<br />
-            Phone: {order.shippingAddress.phone}
-          </address>
-        </div>
+        {order.shippingAddress && (
+          <div className="mt-4 card-toy p-6">
+            <h3 className="font-semibold mb-3">Shipping Address</h3>
+            <address className="text-sm text-gray-700 not-italic">
+              {order.shippingAddress.fullName}<br />
+              {order.shippingAddress.address}<br />
+              {order.shippingAddress.area}, {order.shippingAddress.city}<br />
+              {order.shippingAddress.postalCode}<br />
+              Phone: {order.shippingAddress.phone}
+            </address>
+          </div>
+        )}
 
-        <div className="mt-4 card-toy p-6">
-          <h3 className="font-semibold mb-3">Items</h3>
-          <ul className="space-y-3">
-            {order.items.map((item: any) => (
-              <li key={item._id} className="flex gap-3">
-                <img src={item.productImage} alt={item.productName} className="h-12 w-12 rounded-lg object-cover" />
-                <div className="flex-1">
-                  <p className="font-medium">{item.productName}</p>
-                  {item.variantName && <p className="text-sm text-gray-500">{item.variantName}</p>}
-                  <p className="text-sm text-gray-600">Qty: {item.quantity} × Rs. {item.price.toLocaleString()}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {order.items && order.items.length > 0 && (
+          <div className="mt-4 card-toy p-6">
+            <h3 className="font-semibold mb-3">Items</h3>
+            <ul className="space-y-3">
+              {order.items.map((item: any, i: number) => (
+                <li key={item._id || i} className="flex gap-3">
+                  {item.productImage && <img src={item.productImage} alt={item.productName} className="h-12 w-12 rounded-lg object-cover" />}
+                  <div className="flex-1">
+                    <p className="font-medium">{item.productName}</p>
+                    {item.variantName && <p className="text-sm text-gray-500">{item.variantName}</p>}
+                    <p className="text-sm text-gray-600">
+                      Qty: {item.quantity}
+                      {typeof item.price === 'number' ? ` × Rs. ${item.price.toLocaleString()}` : ''}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       <div className="mt-8 max-w-2xl mx-auto text-center">

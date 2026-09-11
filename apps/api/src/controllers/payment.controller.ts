@@ -99,18 +99,37 @@ export const initiatePayment = asyncHandler(async (req: AuthRequest, res: Respon
 
 // @desc    Payment success callback (redirect from gateway)
 // @route   GET /api/v1/payments/success/:orderNumber
+// The gateway redirects the browser here after payment. The order is only
+// marked as paid when the redirect carries the provider reference that matches
+// the stored paymentId (or the order was already confirmed paid).
 export const paymentSuccess = asyncHandler(async (req: Request, res: Response) => {
   const order = await Order.findOne({ orderNumber: req.params.orderNumber });
   if (!order) throw new AppError('Order not found', 404);
 
-  order.paymentStatus = 'paid';
-  order.status = 'confirmed';
-  order.paymentDetails = {
-    ...(order.paymentDetails || {}),
-    paidAt: new Date(),
-    redirectSuccess: true,
-  };
-  await order.save();
+  if (order.paymentStatus !== 'paid') {
+    const reference = (req.query.reference as string) || (req.query.token as string) || (req.query.paymentId as string);
+    const isConfirmedPaid = Boolean(reference) && reference === order.paymentId;
+
+    if (isConfirmedPaid) {
+      order.paymentStatus = 'paid';
+      order.status = 'confirmed';
+      order.paymentDetails = {
+        ...(order.paymentDetails || {}),
+        paidAt: new Date(),
+        redirectSuccess: true,
+        redirectReference: reference,
+      };
+      await order.save();
+    } else if (order.paymentDetails?.redirectSuccess !== true) {
+      // No proof yet — keep it pending; only a verified webhook or a matching
+      // reference can confirm payment.
+      order.paymentDetails = {
+        ...(order.paymentDetails || {}),
+        redirectReceivedAt: new Date(),
+      };
+      await order.save();
+    }
+  }
 
   res.redirect(`${process.env.CUSTOMER_URL || 'http://localhost:5173'}/order-success/${order.orderNumber}`);
 });
@@ -130,9 +149,17 @@ export const paymentCancel = asyncHandler(async (req: Request, res: Response) =>
 // @desc    Payment webhook (from gateway)
 // @route   POST /api/v1/payments/webhook
 export const paymentWebhook = asyncHandler(async (req: Request, res: Response) => {
-  const { verified, transactionStatus, reference } = verifySafepayWebhook(req.body);
+  const rawBody = (req as any).rawBody as Buffer | undefined;
+  const headerSignature = (req.headers['x-safepay-signature'] as string) || undefined;
+
+  const { verified, transactionStatus, reference, error } = verifySafepayWebhook(
+    rawBody,
+    headerSignature,
+    req.body,
+  );
 
   if (!verified) {
+    console.error('[Payment] Webhook rejected:', error || 'signature verification failed');
     throw new AppError('Webhook signature verification failed', 401);
   }
 
@@ -143,6 +170,21 @@ export const paymentWebhook = asyncHandler(async (req: Request, res: Response) =
   }
 
   const order = await Order.findOne({ orderNumber });
+  if (!order) {
+    // Unknown order — acknowledge but don't act (prevents blind marking)
+    res.status(200).json({ success: true, ack: true });
+    return;
+  }
+
+  const previousReference = order.paymentDetails?.webhookReference as string | undefined;
+  const previousStatus = order.paymentDetails?.webhookStatus as string | undefined;
+
+  // Replay protection: ignore identical webhook deliveries already processed
+  if (reference && previousReference === reference && previousStatus === transactionStatus) {
+    res.status(200).json({ success: true, duplicate: true });
+    return;
+  }
+
   if (order) {
     switch (transactionStatus) {
       case 'successfully_initiated':

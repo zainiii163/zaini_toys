@@ -1,6 +1,14 @@
+import crypto from 'crypto';
 import { AppError } from '../utils/AppError';
 
 const SAFEPAY_BASE = process.env.SAFEPAY_BASE_URL || 'https://sandbox.api.getsafepay.com';
+
+function constantTimeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ab, bb);
+}
 
 interface SafepayInitiateResponse {
   data: {
@@ -71,9 +79,40 @@ export const safepayInitiatePayment = async (params: {
 };
 
 // Safepay webhook verification
-export const verifySafepayWebhook = (payload: any): { verified: boolean; transactionStatus?: string; reference?: string } => {
+//
+// Verifies the HMAC-SHA256 signature of the raw request body using
+// SAFEPAY_WEBHOOK_SECRET. The signature may arrive via the
+// `x-safepay-signature` header or inside the payload itself (`payload.signature`).
+//
+// Fail-closed behaviour: if no webhook secret is configured we reject in
+// production and only accept in non-production (dev/sandbox) with a warning.
+export const verifySafepayWebhook = (
+  rawBody: Buffer | undefined,
+  headerSignature: string | undefined,
+  payload: any,
+): { verified: boolean; transactionStatus?: string; reference?: string; error?: string } => {
   const transactionStatus = payload?.data?.transaction?.transaction_status;
   const reference = payload?.data?.transaction?.reference;
+
+  const secret = process.env.SAFEPAY_WEBHOOK_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      return { verified: false, transactionStatus, reference, error: 'Webhook secret not configured' };
+    }
+    console.warn('[Payment] SAFEPAY_WEBHOOK_SECRET not set — accepting webhook without signature (dev only).');
+    return { verified: true, transactionStatus, reference };
+  }
+
+  const expected = headerSignature || payload?.signature;
+  if (!expected || !rawBody) {
+    return { verified: false, transactionStatus, reference, error: 'Missing webhook signature' };
+  }
+
+  const digest = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+  if (!constantTimeEqual(digest, String(expected))) {
+    return { verified: false, transactionStatus, reference, error: 'Signature mismatch' };
+  }
+
   return { verified: true, transactionStatus, reference };
 };
 
@@ -98,7 +137,7 @@ export const jazzcashInitiatePayment = async (params: {
 }): Promise<{ paymentId: string; paymentUrl: string }> => {
   if (!process.env.JAZZCASH_MERCHANT_ID) {
     console.warn('[Payment] JazzCash not configured — returning mock payment. Set JAZZCASH_MERCHANT_ID to enable.');
-    return { paymentId: `JC-MOCK-${Date.now()}`, paymentUrl: params.redirectUrl };
+    return mockPaymentRedirect(params.redirectUrl);
   }
   // TODO: Implement JazzCash API call
   // POST https://api.jazzcash.com.pk/v1/payment/init
@@ -115,7 +154,7 @@ export const easypaisaInitiatePayment = async (params: {
 }): Promise<{ paymentId: string; paymentUrl: string }> => {
   if (!process.env.EASYPAISA_MERCHANT_ID) {
     console.warn('[Payment] Easypaisa not configured — returning mock payment. Set EASYPAISA_MERCHANT_ID to enable.');
-    return { paymentId: `EP-MOCK-${Date.now()}`, paymentUrl: params.redirectUrl };
+    return mockPaymentRedirect(params.redirectUrl);
   }
   // TODO: Implement Easypaisa API call
   // POST https://api.easypaisa.com.pk/v1/payment/init
@@ -132,11 +171,20 @@ export const raastInitiatePayment = async (params: {
 }): Promise<{ paymentId: string; paymentUrl: string }> => {
   if (!process.env.RAAST_MERCHANT_ID) {
     console.warn('[Payment] Raast not configured — returning mock payment. Set RAAST_MERCHANT_ID to enable.');
-    return { paymentId: `RA-MOCK-${Date.now()}`, paymentUrl: params.redirectUrl };
+    return mockPaymentRedirect(params.redirectUrl);
   }
   // TODO: Implement Raast API call
   // POST https://api.raast.pk/v1/payment/init
   // Headers: Authorization: Bearer <api_key>
   // Body: { amount, currency: 'PKR', phone, merchant_id, order_ref, return_url }
   throw new AppError('Raast integration pending — please use COD for now', 501);
+};
+
+// Mock providers return the redirect URL carrying the payment reference.
+// The success callback only marks the order paid when this reference matches
+// the stored paymentId, so a random visitor can't mark an order as paid.
+const mockPaymentRedirect = (redirectUrl: string): { paymentId: string; paymentUrl: string } => {
+  const paymentId = `MOCK-${crypto.randomBytes(8).toString('hex')}`;
+  const join = redirectUrl.includes('?') ? '&' : '?';
+  return { paymentId, paymentUrl: `${redirectUrl}${join}reference=${paymentId}` };
 };

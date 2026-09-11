@@ -70,3 +70,20 @@ export const adminGetStats = asyncHandler(async (_req: AuthRequest, res: Respons
   ]);
   res.status(200).json({ success: true, data: { total, active, unsubscribed: total - active } });
 });
+
+// @desc    Admin: Update subscriber status
+// @route   PUT /api/v1/newsletter/:id
+export const updateNewsletter = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const updateData: { isSubscribed?: boolean; name?: string } = {};
+  if (typeof req.body.isSubscribed === 'boolean') updateData.isSubscribed = req.body.isSubscribed;
+  if (typeof req.body.name === 'string') updateData.name = req.body.name;
+
+  const sub = await Newsletter.findByIdAndUpdate(
+    req.params.id,
+    { $set: updateData },
+    { new: true },
+  );
+  if (!sub) throw new AppError('Subscriber not found', 404);
+
+  res.status(200).json({ success: true, data: sub });
+});

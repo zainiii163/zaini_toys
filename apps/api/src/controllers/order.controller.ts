@@ -6,7 +6,7 @@ import { Coupon } from '../models/Coupon';
 import { User } from '../models/User';
 import { AppError } from '../utils/AppError';
 import { asyncHandler } from '../utils/asyncHandler';
-import { getPaginationParams, getPaginationMeta, generateOrderNumber } from '@toys/utils';
+import { getPaginationParams, getPaginationMeta, generateOrderNumber, escapeRegExp } from '@toys/utils';
 import { reserveStock, commitReservedStock, releaseStock } from '../services/stock.service';
 import { emailService } from '../services/email.service';
 import type { AuthRequest } from '../middleware/auth';
@@ -270,7 +270,9 @@ export const getOrderByNumber = asyncHandler(async (req: AuthRequest, res: Respo
 
   if (!order) throw new AppError('Order not found', 404);
 
-  if (!req.user?._id || String(order.customer) !== String(req.user._id)) {
+  const STAFF_ROLES = ['admin', 'manager', 'order_manager', 'inventory_manager', 'support', 'marketing', 'content'];
+  const isStaff = !!req.user && STAFF_ROLES.includes(req.user.role);
+  if (!isStaff && String(order.customer) !== String(req.user._id)) {
     throw new AppError('Not authorized to view this order', 403);
   }
 
@@ -352,7 +354,7 @@ export const requestReturn = asyncHandler(async (req: AuthRequest, res: Response
   res.status(200).json({ success: true, data: order });
 });
 
-// @desc    Track order
+// @desc    Track order by ID (owner only)
 // @route   GET /api/v1/orders/:id/track
 export const trackOrder = asyncHandler(async (req: AuthRequest, res: Response) => {
   const order = await Order.findById(req.params.id).select(
@@ -360,7 +362,40 @@ export const trackOrder = asyncHandler(async (req: AuthRequest, res: Response) =
   );
   if (!order) throw new AppError('Order not found', 404);
 
+  if (String(order.customer) !== String(req.user._id)) {
+    throw new AppError('Not authorized to view this order', 403);
+  }
+
   res.status(200).json({ success: true, data: order });
+});
+
+// @desc    Public order tracking by order number (no PII)
+// @route   GET /api/v1/orders/public/:orderNumber/track
+export const publicTrackOrder = asyncHandler(async (req: Request, res: Response) => {
+  const order = await Order.findOne({ orderNumber: req.params.orderNumber }).select(
+    'orderNumber status statusHistory trackingNumber courierService estimatedDelivery deliveredAt shippingMethod createdAt items.productName items.productImage items.quantity',
+  );
+  if (!order) throw new AppError('Order not found', 404);
+
+  res.status(200).json({ success: true, data: order });
+});
+
+// @desc    Admin: Get a user's orders
+// @route   GET /api/v1/orders/admin/user/:userId
+export const adminGetUserOrders = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { page, limit, skip } = getPaginationParams(req.query);
+  const filter = { customer: req.params.userId };
+
+  const [orders, total] = await Promise.all([
+    Order.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    Order.countDocuments(filter),
+  ]);
+
+  res.status(200).json({
+    success: true,
+    data: orders,
+    pagination: getPaginationMeta(total, page, limit),
+  });
 });
 
 // @desc    Reorder
@@ -415,9 +450,9 @@ export const adminGetOrders = asyncHandler(async (req: AuthRequest, res: Respons
   if (paymentStatus) filter.paymentStatus = paymentStatus;
   if (search) {
     filter.$or = [
-      { orderNumber: { $regex: search, $options: 'i' } },
-      { 'customerInfo.name': { $regex: search, $options: 'i' } },
-      { 'customerInfo.email': { $regex: search, $options: 'i' } },
+      { orderNumber: { $regex: escapeRegExp(String(search)), $options: 'i' } },
+      { 'customerInfo.name': { $regex: escapeRegExp(String(search)), $options: 'i' } },
+      { 'customerInfo.email': { $regex: escapeRegExp(String(search)), $options: 'i' } },
     ];
   }
   if (startDate || endDate) {
@@ -538,4 +573,30 @@ export const adminOrderStats = asyncHandler(async (req: AuthRequest, res: Respon
       byStatus: stats,
     },
   });
+});
+
+// @desc    Admin: Daily order/revenue stats
+// @route   GET /api/v1/orders/admin/stats/daily?period=7d|30d|90d
+export const adminDailyOrderStats = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const period = String(req.query.period || '7d');
+  const days = period === '30d' ? 30 : period === '90d' ? 90 : 7;
+  const start = new Date();
+  start.setDate(start.getDate() - (days - 1));
+  start.setHours(0, 0, 0, 0);
+
+  const pipeline: any[] = [
+    { $match: { createdAt: { $gte: start } } },
+    {
+      $group: {
+        _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+        revenue: { $sum: '$total' },
+        orders: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+    { $project: { _id: 0, date: '$_id', revenue: 1, orders: 1 } },
+  ];
+
+  const daily = await Order.aggregate(pipeline);
+  res.status(200).json({ success: true, data: daily });
 });
