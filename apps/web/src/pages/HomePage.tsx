@@ -17,7 +17,8 @@ import TestimonialSection from '../components/TestimonialSection'
 import NewsletterSection from '../components/NewsletterSection'
 import RecentlyViewed from '../components/RecentlyViewed'
 import SEO from '../components/SEO'
-import { BUDGET_RANGES, LITTLE_ONES, SEO_TEXT } from '../config/site'
+import Reveal from '../components/Reveal'
+import { BUDGET_RANGES, LITTLE_ONES, SEO_TEXT, TRUST_ITEMS } from '../config/site'
 import type { LittleOne } from '../config/site'
 
 const budgetUrl = (b: { max: number }) => `/shop?maxPrice=${b.max}`
@@ -37,6 +38,10 @@ const TRUST_BADGES = [
   { icon: CreditCard, title: 'Secure Payment', desc: 'COD & online cards', color: 'text-nectarine' },
   { icon: Gift, title: '7-Day Returns', desc: 'Easy return policy', color: 'text-pink-500' },
 ]
+
+const HERO_FLOATS = ['🧸', '🎈', '🎨', '🪀', '🐉', '🪁', '✨', '🚀']
+
+const MARQUEE_ITEMS = [...TRUST_ITEMS.map((i) => `${i.emoji} ${i.text}`), '🎉 New arrivals every week!', '🎁 Free gift wrapping over Rs. 5,000', '⭐ Rated 4.8/5 by 12,000+ parents']
 
 export default function HomePage() {
   const { data: bannersData } = useGetBannersQuery({ position: 'hero' })
@@ -100,10 +105,31 @@ export default function HomePage() {
           {heroBanners.length > 0 && (
             <div className="absolute inset-0 bg-gradient-to-r from-blue-950/70 via-blue-900/40 to-transparent" />
           )}
-          <div className="container-toy relative flex h-full flex-col justify-center">
-            <h1 className="max-w-xl font-display text-4xl font-bold text-white sm:text-5xl">{heroTitle}</h1>
-            <p className="mt-3 max-w-lg text-lg text-blue-100">{heroSubtitle}</p>
-            <Link to={heroLink} className="btn-primary mt-6 w-fit bg-white !text-primary-dark hover:bg-gray-100">
+
+          {/* Floating decorations */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+            {HERO_FLOATS.map((emoji, i) => (
+              <span
+                key={i}
+                className="absolute select-none text-3xl opacity-60 sm:opacity-40"
+                style={{
+                  left: `${10 + (i * 11) % 80}%`,
+                  top: `${12 + (i * 17) % 70}%`,
+                  animationDelay: `${i * 0.4}s`,
+                  animationDuration: `${4.5 + i * 0.5}s`,
+                }}
+                aria-hidden
+              >
+                <span className={i % 2 === 0 ? 'animate-floaty inline-block' : 'animate-floaty-slow inline-block'}>{emoji}</span>
+              </span>
+            ))}
+            <span className="pointer-events-none absolute -right-20 -top-20 h-96 w-96 rounded-full bg-gradient-to-br from-teal-400/25 to-nectarine/20 blur-3xl animate-spin-slow" />
+          </div>
+
+          <div key={heroIdx} className="container-toy relative flex h-full flex-col justify-center">
+            <h1 className="max-w-xl font-display text-4xl font-bold text-white sm:text-5xl rise" style={{ animationDelay: '0ms' }}>{heroTitle}</h1>
+            <p className="mt-3 max-w-lg text-lg text-blue-100 rise" style={{ animationDelay: '90ms' }}>{heroSubtitle}</p>
+            <Link to={heroLink} className="btn-primary btn-shine mt-6 w-fit bg-white !text-primary-dark hover:bg-gray-100 rise" style={{ animationDelay: '180ms' }}>
               Shop Now <ChevronRight className="ml-1 h-4 w-4" />
             </Link>
           </div>
@@ -111,14 +137,14 @@ export default function HomePage() {
             <>
               <button
                 onClick={() => setHeroIdx((heroIdx - 1 + heroBanners.length) % heroBanners.length)}
-                className="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-white/80 p-2 text-gray-700 shadow hover:bg-white sm:block"
+                className="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-white/80 p-2 text-gray-700 shadow hover:bg-white transition-all hover:scale-110 sm:block"
                 aria-label="Previous banner"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setHeroIdx((heroIdx + 1) % heroBanners.length)}
-                className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-white/80 p-2 text-gray-700 shadow hover:bg-white sm:block"
+                className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-white/80 p-2 text-gray-700 shadow hover:bg-white transition-all hover:scale-110 sm:block"
                 aria-label="Next banner"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -128,7 +154,7 @@ export default function HomePage() {
                   <button
                     key={i}
                     onClick={() => setHeroIdx(i)}
-                    className={`h-2 rounded-full transition-all ${i === heroIdx ? 'w-6 bg-white' : 'w-2 bg-white/50'}`}
+                    className={`h-2 rounded-full transition-all duration-500 ${i === heroIdx ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'}`}
                     aria-label={`Go to banner ${i + 1}`}
                   />
                 ))}
@@ -138,84 +164,105 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Marquee trust strip */}
+      <div className="border-y border-gray-200 bg-white py-2 overflow-hidden">
+        <div className="marquee-track text-xs font-medium text-gray-600 gap-8">
+          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
+            <span key={i} className="flex items-center gap-1.5 whitespace-nowrap px-4">
+              {item}
+              <span className="text-primary/30">•</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* Trust badges */}
       <section className="container-toy grid gap-4 py-8 sm:grid-cols-2 lg:grid-cols-4">
-        {TRUST_BADGES.map(({ icon: Icon, title, desc, color }) => (
-          <div key={title} className="card-toy flex items-center gap-3 p-4">
-            <Icon className={`h-8 w-8 ${color}`} />
-            <div>
-              <p className="text-sm font-semibold">{title}</p>
-              <p className="text-xs text-gray-500">{desc}</p>
+        {TRUST_BADGES.map(({ icon: Icon, title, desc, color }, i) => (
+          <Reveal key={title} delay={i * 80}>
+            <div className="card-toy flex h-full items-center gap-3 p-4">
+              <span className="animate-pulse-soft flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50">
+                <Icon className={`h-7 w-7 ${color}`} />
+              </span>
+              <div>
+                <p className="text-sm font-semibold">{title}</p>
+                <p className="text-xs text-gray-500">{desc}</p>
+              </div>
             </div>
-          </div>
+          </Reveal>
         ))}
       </section>
 
       {/* Top Selling Categories */}
       <section className="container-toy py-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-2xl font-semibold">Top Selling Categories</h2>
-          <Link to="/shop" className="text-sm font-medium text-primary hover:underline">View all</Link>
-        </div>
+        <Reveal>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-2xl font-semibold">Top Selling Categories</h2>
+            <Link to="/shop" className="text-sm font-medium text-primary hover:underline">View all</Link>
+          </div>
+        </Reveal>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {categories.map((cat, idx) => (
-            <Link
-              key={cat._id}
-              to={`/shop?category=${cat.slug}`}
-              className="card-toy group relative flex flex-col items-center p-4 text-center transition-shadow hover:shadow-md"
-            >
-              <span
-                className={`absolute left-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-bold text-white ${idx % 2 === 0 ? 'bg-red-500' : 'bg-primary'}`}
+            <Reveal key={cat._id} delay={idx * 60}>
+              <Link
+                to={`/shop?category=${cat.slug}`}
+                className="card-toy group relative flex flex-col items-center p-4 text-center"
               >
-                {idx % 2 === 0 ? 'HOT' : 'NEW'}
-              </span>
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-2xl">
-                {cat.image ? (
-                  <img src={cat.image} alt={cat.name} className="h-12 w-12 rounded-full object-cover" />
-                ) : (
-                  <span>{cat.icon || '🧸'}</span>
-                )}
-              </div>
-              <p className="mt-2 text-sm font-medium text-gray-800 group-hover:text-primary">{cat.name}</p>
-            </Link>
+                <span
+                  className={`absolute left-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-bold text-white ${idx % 2 === 0 ? 'bg-red-500' : 'bg-primary'}`}
+                >
+                  {idx % 2 === 0 ? 'HOT' : 'NEW'}
+                </span>
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-2xl group-hover:scale-110 transition-transform">
+                  {cat.image ? (
+                    <img src={cat.image} alt={cat.name} className="h-12 w-12 rounded-full object-cover" />
+                  ) : (
+                    <span>{cat.icon || '🧸'}</span>
+                  )}
+                </div>
+                <p className="mt-2 text-sm font-medium text-gray-800 group-hover:text-primary">{cat.name}</p>
+              </Link>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* Shop for Little Ones */}
       <section className="container-toy py-8">
-        <h2 className="mb-4 font-display text-2xl font-semibold">Shop for Little Ones</h2>
+        <Reveal><h2 className="mb-4 font-display text-2xl font-semibold">Shop for Little Ones</h2></Reveal>
         <div className="grid gap-4 sm:grid-cols-3">
-          {LITTLE_ONES.map((l) => (
-            <Link
-              key={l.label}
-              to={littleOneUrl(l)}
-              className={`card-toy group flex flex-col items-center justify-center gap-2 bg-gradient-to-br ${l.tile} p-8 text-center transition-shadow hover:shadow-md`}
-            >
-              <span className="text-5xl transition-transform group-hover:scale-110">{l.emoji}</span>
-              <p className="font-display text-lg font-semibold text-gray-800">{l.label}</p>
-              <span className="text-xs font-medium text-gray-500 group-hover:text-primary">Shop now →</span>
-            </Link>
+          {LITTLE_ONES.map((l, i) => (
+            <Reveal key={l.label} delay={i * 80}>
+              <Link
+                to={littleOneUrl(l)}
+                className={`card-toy group flex flex-col items-center justify-center gap-2 bg-gradient-to-br ${l.tile} p-8 text-center`}
+              >
+                <span className="text-5xl transition-transform group-hover:scale-110">{l.emoji}</span>
+                <p className="font-display text-lg font-semibold text-gray-800">{l.label}</p>
+                <span className="text-xs font-medium text-gray-500 group-hover:text-primary">Shop now →</span>
+              </Link>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* Shop by Budget */}
       <section className="container-toy py-8">
-        <h2 className="mb-4 font-display text-2xl font-semibold">Shop by Budget</h2>
+        <Reveal><h2 className="mb-4 font-display text-2xl font-semibold">Shop by Budget</h2></Reveal>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {BUDGET_RANGES.map((b, idx) => (
-            <Link
-              key={b.label}
-              to={budgetUrl(b)}
-              className={`card-toy group flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-br p-5 transition-shadow hover:shadow-md ${BUDGET_TILES[idx % BUDGET_TILES.length]}`}
-            >
-              <div>
-                <p className="font-display text-lg font-semibold text-gray-800">{b.label}</p>
-                <span className="text-xs text-gray-500 group-hover:text-orange-600">Explore →</span>
-              </div>
-              <span className="text-3xl">{b.emoji}</span>
-            </Link>
+            <Reveal key={b.label} delay={idx * 70}>
+              <Link
+                to={budgetUrl(b)}
+                className={`card-toy group flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-br p-5 ${BUDGET_TILES[idx % BUDGET_TILES.length]}`}
+              >
+                <div>
+                  <p className="font-display text-lg font-semibold text-gray-800">{b.label}</p>
+                  <span className="text-xs text-gray-500 group-hover:text-orange-600">Explore →</span>
+                </div>
+                <span className="text-3xl transition-transform group-hover:scale-110">{b.emoji}</span>
+              </Link>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -223,29 +270,31 @@ export default function HomePage() {
       {/* Flash Sale */}
       {flashSale && flashItems.length > 0 && (
         <section className="container-toy py-4">
-          <div className="card-toy overflow-hidden border-red-200 bg-gradient-to-r from-red-50 to-orange-50 p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl font-bold text-red-600">⚡ Flash Sale</h2>
-              <Link to="/shop?onSale=true" className="text-sm font-medium text-red-600 hover:underline">View all</Link>
+          <Reveal variant="zoom">
+            <div className="card-toy overflow-hidden border-red-200 bg-gradient-to-r from-red-50 to-orange-50 p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="font-display text-xl font-bold text-red-600">⚡ Flash Sale</h2>
+                <Link to="/shop?onSale=true" className="text-sm font-medium text-red-600 hover:underline">View all</Link>
+              </div>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                {flashItems.slice(0, 5).map((item: any) => {
+                  const p = item.product
+                  if (!p) return null
+                  return (
+                    <Link key={p._id} to={`/product/${p.slug}`} className="card-toy group overflow-hidden">
+                      <div className="aspect-square overflow-hidden bg-gray-100">
+                        <img src={p.images?.[0]?.url} alt={p.name} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                      </div>
+                      <div className="p-3">
+                        <p className="line-clamp-1 text-sm font-medium">{p.name}</p>
+                        <p className="text-sm font-bold text-red-600">Rs. {item.salePrice?.toLocaleString()}</p>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-              {flashItems.slice(0, 5).map((item: any) => {
-                const p = item.product
-                if (!p) return null
-                return (
-                  <Link key={p._id} to={`/product/${p.slug}`} className="card-toy group overflow-hidden">
-                    <div className="aspect-square overflow-hidden bg-gray-100">
-                      <img src={p.images?.[0]?.url} alt={p.name} className="h-full w-full object-cover" loading="lazy" />
-                    </div>
-                    <div className="p-3">
-                      <p className="line-clamp-1 text-sm font-medium">{p.name}</p>
-                      <p className="text-sm font-bold text-red-600">Rs. {item.salePrice?.toLocaleString()}</p>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
+          </Reveal>
         </section>
       )}
 
@@ -287,14 +336,20 @@ export default function HomePage() {
 
       {/* Featured Products */}
       <section className="container-toy py-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-2xl font-semibold">Featured Toys</h2>
-          <Link to="/shop?featured=true" className="text-sm font-medium text-primary hover:underline">View all</Link>
-        </div>
+        <Reveal>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-2xl font-semibold">Featured Toys</h2>
+            <Link to="/shop?featured=true" className="text-sm font-medium text-primary hover:underline">View all</Link>
+          </div>
+        </Reveal>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {featuredLoading
             ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
-            : featuredProducts.map((p) => <ProductCard key={p._id} product={p} />)}
+            : featuredProducts.map((p, i) => (
+                <Reveal key={p._id} delay={i * 60}>
+                  <ProductCard product={p} />
+                </Reveal>
+              ))}
         </div>
       </section>
 
@@ -310,28 +365,40 @@ export default function HomePage() {
       {/* New Arrivals */}
       <section className="bg-white py-8">
         <div className="container-toy">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-2xl font-semibold">New Arrivals</h2>
-            <Link to="/shop?newArrival=true" className="text-sm font-medium text-primary hover:underline">View all</Link>
-          </div>
+          <Reveal>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-2xl font-semibold">New Arrivals</h2>
+              <Link to="/shop?newArrival=true" className="text-sm font-medium text-primary hover:underline">View all</Link>
+            </div>
+          </Reveal>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {newLoading
               ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-              : newArrivals.map((p) => <ProductCard key={p._id} product={p} />)}
+              : newArrivals.map((p, i) => (
+                  <Reveal key={p._id} delay={i * 60}>
+                    <ProductCard product={p} />
+                  </Reveal>
+                ))}
           </div>
         </div>
       </section>
 
       {/* Best Sellers */}
       <section className="container-toy py-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-2xl font-semibold">Best Sellers</h2>
-          <Link to="/shop?bestSeller=true" className="text-sm font-medium text-primary hover:underline">View all</Link>
-        </div>
+        <Reveal>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-2xl font-semibold">Best Sellers</h2>
+            <Link to="/shop?bestSeller=true" className="text-sm font-medium text-primary hover:underline">View all</Link>
+          </div>
+        </Reveal>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {bestLoading
             ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-            : bestSellers.map((p) => <ProductCard key={p._id} product={p} />)}
+            : bestSellers.map((p, i) => (
+                <Reveal key={p._id} delay={i * 60}>
+                  <ProductCard product={p} />
+                </Reveal>
+              ))}
         </div>
       </section>
 
@@ -339,26 +406,29 @@ export default function HomePage() {
       {brands.length > 0 && (
         <section className="bg-gray-50 py-8">
           <div className="container-toy">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-2xl font-semibold">Popular Brands</h2>
-              <Link to="/shop" className="text-sm font-medium text-primary hover:underline">View all</Link>
-            </div>
+            <Reveal>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="font-display text-2xl font-semibold">Popular Brands</h2>
+                <Link to="/shop" className="text-sm font-medium text-primary hover:underline">View all</Link>
+              </div>
+            </Reveal>
             <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-6">
-              {brands.slice(0, 6).map((brand) => (
-                <Link
-                  key={brand._id}
-                  to={`/shop?brand=${brand.slug}`}
-                  className="card-toy flex flex-col items-center p-4 text-center transition-shadow hover:shadow-md"
-                >
-                  {brand.logo ? (
-                    <img src={brand.logo.url} alt={brand.name} className="h-12 w-12 rounded-full object-contain" />
-                  ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-lg font-bold text-gray-400">
-                      {brand.name[0]}
-                    </div>
-                  )}
-                  <p className="mt-2 text-xs font-medium text-gray-700">{brand.name}</p>
-                </Link>
+              {brands.slice(0, 6).map((brand, i) => (
+                <Reveal key={brand._id} delay={i * 60}>
+                  <Link
+                    to={`/shop?brand=${brand.slug}`}
+                    className="card-toy flex flex-col items-center p-4 text-center"
+                  >
+                    {brand.logo ? (
+                      <img src={brand.logo.url} alt={brand.name} className="h-12 w-12 rounded-full object-contain transition-transform group-hover:scale-110" />
+                    ) : (
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-lg font-bold text-gray-400">
+                        {brand.name[0]}
+                      </div>
+                    )}
+                    <p className="mt-2 text-xs font-medium text-gray-700">{brand.name}</p>
+                  </Link>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -367,26 +437,30 @@ export default function HomePage() {
 
       {/* Educational Toys CTA */}
       <section className="container-toy py-8">
-        <div className="card-toy overflow-hidden bg-gradient-to-r from-teal-500 to-primary p-8 text-white">
-          <div className="flex flex-col items-center text-center">
-            <span className="text-4xl">🧠</span>
-            <h2 className="mt-3 font-display text-2xl font-bold">Educational Toys</h2>
-            <p className="mt-2 max-w-md text-blue-100">Toys that develop STEM skills, creativity, problem solving, and motor skills. Perfect for learning through play.</p>
-            <Link to="/shop?category=educational" className="btn-primary mt-4 bg-white !text-primary-dark hover:bg-gray-100">
-              Explore Educational Toys
-            </Link>
+        <Reveal variant="zoom">
+          <div className="card-toy overflow-hidden bg-gradient-to-r from-teal-500 to-primary p-8 text-white animate-gradient-pan">
+            <div className="flex flex-col items-center text-center">
+              <span className="text-5xl animate-pulse-soft">🧠</span>
+              <h2 className="mt-3 font-display text-2xl font-bold">Educational Toys</h2>
+              <p className="mt-2 max-w-md text-blue-100">Toys that develop STEM skills, creativity, problem solving, and motor skills. Perfect for learning through play.</p>
+              <Link to="/shop?category=educational" className="btn-primary btn-shine mt-4 bg-white !text-primary-dark hover:bg-gray-100">
+                Explore Educational Toys
+              </Link>
+            </div>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* SEO text */}
       <section className="bg-white py-10">
-        <div className="container-toy mx-auto max-w-3xl text-center text-sm leading-relaxed text-gray-600">
-          <h2 className="font-display text-xl font-semibold text-gray-900">{SEO_TEXT.title}</h2>
-          {SEO_TEXT.paragraphs.map((p, i) => (
-            <p key={i} className="mt-3">{p}</p>
-          ))}
-        </div>
+        <Reveal>
+          <div className="container-toy mx-auto max-w-3xl text-center text-sm leading-relaxed text-gray-600">
+            <h2 className="font-display text-xl font-semibold text-gray-900">{SEO_TEXT.title}</h2>
+            {SEO_TEXT.paragraphs.map((p, i) => (
+              <p key={i} className="mt-3">{p}</p>
+            ))}
+          </div>
+        </Reveal>
       </section>
 
       {/* Videos */}

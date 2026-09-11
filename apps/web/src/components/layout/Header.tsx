@@ -20,6 +20,7 @@ export default function Header() {
   const [search, setSearch] = useState('')
   const [megaOpen, setMegaOpen] = useState(false)
   const [annIdx, setAnnIdx] = useState(0)
+  const [scrolled, setScrolled] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const auth = useAppSelector((s) => s.auth)
@@ -36,6 +37,13 @@ export default function Header() {
   }, [])
 
   useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
     setMegaOpen(false)
     setMobileOpen(false)
   }, [location.pathname, location.search])
@@ -48,7 +56,7 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 shadow-sm">
+    <header className={`sticky top-0 z-50 transition-shadow duration-300 ${scrolled ? 'shadow-md shadow-blue-100/60' : 'shadow-sm'}`}>
       {/* Announcement bar */}
       <div className="bg-blue-950 text-white">
         <div className="container-toy grid grid-cols-1 items-center gap-1 py-1.5 text-xs md:grid-cols-3">
@@ -83,8 +91,8 @@ export default function Header() {
             {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
 
-          <Link to="/" className="flex shrink-0 items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-teal-400 text-xl font-bold text-white shadow-md shadow-blue-200">
+          <Link to="/" className="group flex shrink-0 items-center gap-2">
+            <div className="animate-wiggle flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-teal-400 text-xl font-bold text-white shadow-md shadow-blue-200">
               T
             </div>
             <div className="hidden sm:block">
@@ -115,7 +123,7 @@ export default function Header() {
               <div className="relative">
                 <ShoppingCart className="h-5 w-5 text-gray-600 group-hover:text-primary transition-colors" />
                 {cartCount > 0 && (
-                  <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
+                  <span key={cartCount} className="animate-pop absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
                     {cartCount}
                   </span>
                 )}
